@@ -1,0 +1,37 @@
+/* General Note: This CSS stylesheet defines the visual appearance of the Zombie Shooter game. It includes styles for the canvas, titles, descriptions, controls, and overall layout. */
+
+/* Global styling for HTML and body to ensure full height and background image */
+html, body {
+    height: 100%; /* Ensures the background image fills the viewport */
+    margin: 0; /* Removes default browser margin */
+    background-image: url('images/gameplaybg.png'); /* Replace with the path to your background image */
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Keeps the image fixed when scrolling */
+    background-position: center; /* Centers the image */
+    overflow: hidden; /* Hides overflow content to prevent scrolling */
+}
+
+/* Style for the game canvas element */
+canvas {
+    border: 10px solid black; /* Adds a thick black border around the canvas */
+    border-radius: 5px; /* Rounds the corners of the border */
+    padding-left: 0; /* Removes left padding */
+    padding-right: 0; /* Removes right padding */
+    margin-left: auto; /* Centers the canvas horizontally */
+    margin-right: auto; /* Centers the canvas horizontally */
+    display: block; /* Ensures the canvas behaves as a block element */
+    background-color: rgba(255, 255, 255, 0.8); /* Adds a light transparent background for visibility */
+    margin-top: 25px; /* Adds spacing above the canvas to push it lower */
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 768px) {
+    canvas {
+        width: 100%; /* Ensures the canvas scales down on smaller screens */
+    }
+
+    .Game-Title {
+        font-size: 50px; /* Reduces the font size for the title */
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> <!-- Specifies the character encoding for the document -->
+    <link rel="stylesheet" href="gameplay.css"> <!-- Links to the external CSS file for styling -->
+    <script src="script.js"></script> <!-- Links to the external JavaScript file for game functionality -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> 
+          <!-- Links the Bootstrap CSS for pre-designed styles and grid system -->
+    <title>Fear Nexus</title> <!-- Specifies the title of the webpage -->
+</head>
+<!-- This HTML structure is for a Fear Nexus game under development. -->
+<body onload="startGame()"> <!-- Executes the startGame() function when the page loads -->
+    <h1 class="Game-Title"></h1> <!-- Main title for the game -->
+    
+    
+
+<audio id="backgroundMusic"></audio>
+<script>
+    // Array of audio tracks
+    // This array holds the file paths of the audio tracks to be played.
+    const audioTracks = [
+        "Myuu-Grotesque-Fantasia.mp3", // Track 1: Grotesque Fantasia
+        "Myuu-Obsessions.mp3",        // Track 2: Obsessions
+        "Myuu-Countdown.mp3",         // Track 3: Countdown
+        "Myuu-Collapse.mp3"           // Track 4: Collapse
+    ];
+
+    // Get a reference to the audio element in the HTML
+    const audio = document.getElementById("backgroundMusic");
+
+    // Boolean flag to ensure the audio starts only once after user interaction
+    let hasStarted = false;
+
+    // Function to play a random track from the audioTracks array
+    function playRandomTrack() {
+        // Generate a random index to select a track from the array
+        const randomIndex = Math.floor(Math.random() * audioTracks.length);
+
+        // Set the audio source to the selected track
+        audio.src = audioTracks[randomIndex];
+
+        // Attempt to play the audio; catch any errors (e.g., autoplay restrictions)
+        audio.play().catch(error => {
+            console.error("Audio playback failed:", error);
+        });
+    }
+
+    // Event listener for when the current audio track ends
+    audio.addEventListener("ended", () => {
+        playRandomTrack(); // Automatically play another random track
+    });
+
+    // Event listener for user interaction (click) to start playback
+    document.addEventListener("click", () => {
+        // Check if the music has not already started
+        if (!hasStarted) {
+            hasStarted = true; // Mark as started to prevent multiple triggers
+            playRandomTrack(); // Play the first random track
+        }
+    });
+</script>
+
+</body>
+</html>

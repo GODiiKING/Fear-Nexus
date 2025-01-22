@@ -1,0 +1,128 @@
+/* General Note: This CSS stylesheet defines the visual appearance of the Zombie Shooter game. It includes styles for the canvas, titles, descriptions, controls, and overall layout. */
+
+/* Global styling for HTML and body to ensure full height and background image */
+html, body {
+    height: 100%; /* Ensures the background image fills the viewport */
+    margin: 0; /* Removes default browser margin */
+    background-image: url('images/homebg.png'); /* Replace with the path to your background image */
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Keeps the image fixed when scrolling */
+    background-position: center; /* Centers the image */
+    overflow: hidden; /* Hides overflow content to prevent scrolling */
+}
+
+
+
+
+/* Style for the game controls title */
+.Game-Controls-Title,
+.Game-Description-Title {
+    background-color: #000000; /* Solid black background */
+    color: #FFFFFF; /* Sets the text color to white */
+    margin-top: 1px; /* Adds spacing above the title */
+    margin-bottom: 0; /* Removes spacing below the title */
+    padding: 2px; /* Adds padding inside the title block */
+    border-radius: 1px; /* Rounds the corners */
+    font-family: 'Acme', sans-serif;
+}
+
+
+/* General paragraph styling */
+p {
+    color: #0B0A07; /* Sets the text color to a dark shade */
+}
+
+
+/* Button container styles */
+.button-container {
+    position: absolute; /* Allows positioning relative to the nearest positioned ancestor */
+    top: 49%; /* Adjust this value to place it directly below the teeth */
+    left: 51%; /* Horizontally center */
+    transform: translate(-50%, -50%); /* Perfect centering */
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* Play button styles for <a> */
+.play-button {
+    display: inline-block; /* Makes the <a> behave like a button */
+    background-color: #000000; /* Black background for the button */
+    color: #FFFFFF; /* White text */
+    text-decoration: none; /* Removes underline from link */
+    font-size: 20px; /* Adjust font size */
+    padding: 10px 20px; /* Add padding for a larger button */
+    border: none; /* Remove border */
+    border-radius: 1px; /* Add slight rounding to edges */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition effect */
+    text-align: center; /* Centers the text inside */
+}
+
+/* Hover effect for the button */
+.play-button:hover {
+    background-color: #1b1b1b; /* Slightly lighter black on hover */
+}
+
+/* Style for game guide links */
+.game-guide-link {
+    display: inline-block;  /* Makes the link behave like an inline block element */
+    margin-top: 1px;  /* Adds a small space at the top of the link */
+    color: #9ea194;  /* Sets the link text color to a muted greenish shade */
+    text-decoration: none;  /* Removes the default underline from links */
+}
+
+/* Hover effect for game guide links */
+.game-guide-link:hover {
+    text-decoration: none;  /* Ensures the underline does not appear when hovering */
+    color: #1b1b1b;  /* Changes the text color to a dark shade when hovered */
+}
+
+/* Styling for the audio section */
+.audio-section {
+    text-align: left;  /* Aligns the content of the audio section to the left */
+}
+
+/* Styling for the audio player */
+.audio-section audio {
+
+    background-color: #000000;  /* Sets the background color of the audio player to black */
+    border: 2px solid #000000;  /* Adds a solid black border around the audio player */
+    border-radius: 10px;  /* Rounds the corners of the audio player */
+    padding: 5px;  /* Adds padding inside the audio player */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);  /* Adds a subtle shadow effect around the audio player */
+    color: #d5c8af;  /* Sets the text color for player elements (e.g., button labels) */
+}
+
+/* Styling for the header inside the audio section */
+.audio-section h4 {
+    margin-bottom: 10px;  /* Adds space below the header */
+    font-size: 1.2em;  /* Increases the font size of the header */
+    color: #f8b700;  /* Sets the color of the header to a gold shade */
+}
+
+
+
+
+/* Responsive styling for smaller screens */
+/* Responsive styling for mobile devices */
+@media (max-width: 768px) {
+    html, body {
+        background-image: url('images/homebg2.png'); /* Optional: Use a mobile-specific background image */
+        background-size: cover; /* Ensures the image covers the screen proportionally */
+        background-position: center top; /* Positions the image to fit well for mobile */
+    }
+
+    canvas {
+        width: 100%; /* Ensures the canvas scales down on smaller screens */
+        height: auto; /* Maintains the aspect ratio */
+    }
+
+    .Game-Title {
+        font-size: 2.5rem; /* Adjusts font size for mobile screens */
+        text-align: center; /* Centers the title */
+        padding: 0 15px; /* Adds padding for spacing */
+        margin-top: 10px; /* Adds top margin to prevent title from being too close to other content */
+        color: #FFFFFF; /* Ensures the title stands out against the background */
+    }
+}
