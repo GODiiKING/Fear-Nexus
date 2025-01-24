@@ -7,10 +7,10 @@
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 </div>
 
-# Game Documentation: Top-Down Zombie Shooter
+# Game Documentation: Top-Down Shooter (Fear Nexus)
 
 ## Overview
-This JavaScript-based game is a top-down zombie shooter. The player controls a survivor armed with a shotgun, fending off waves of zombies while aiming for the highest score. The game features movement, shooting mechanics, animated sprites, and infinite scrolling terrain.
+Fear Nexus is a top-down shooter game where the player controls a character to shoot demons while avoiding being attacked. The game features infinite scrolling backgrounds and sound effects to enhance the gameplay experience.
 
 ## Features
 - **Player Movement:** Controlled via keyboard input.
