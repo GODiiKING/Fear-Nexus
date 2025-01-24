@@ -123,7 +123,7 @@ This game utilizes assets from:
 <!--Title-->
 <div align="center">
 
-## Zombie Shooter
+## Fear Nexus
 
 </div>
 
@@ -133,10 +133,10 @@ This game utilizes assets from:
 
 ## Overview
 
-Zombie Shooter HTML Canvas created by Dinesh van Putten.
+Fear Nexus HTML Canvas was created by Dinesh van Putten.
 This is early in the game development process. This game is still a work in progress. Please be patient. 
 
-Zombie Shooter is an HTML5-based game currently under development. This project uses HTML, CSS, and JavaScript to create an interactive browser-based game where players shoot zombies and navigate a simple interface.
+Fear Nexus is an HTML5-based game currently under development. This project uses HTML, CSS, and JavaScript to create an interactive browser-based game where players shoot demons and navigate a simple interface.
 
 This project demonstrates early-stage game development and is built with responsive design principles using Bootstrap. While functional, the game is still a work in progress, with room for further development and refinement.
 
@@ -177,11 +177,6 @@ This project demonstrates early-stage game development and is built with respons
 <!--Description-->
 
 <div align="left">
-
-## Features
-- 
-- 
-- 
 
 ## Gameplay
 - Navigate using keyboard controls (`W`, `S`) and interact with the game using the mouse (left-click to shoot).
