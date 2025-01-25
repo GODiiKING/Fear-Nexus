@@ -15,7 +15,7 @@ Fear Nexus is a top-down shooter game where the player controls a character to s
 ## Features
 - **Player Movement:** Controlled via keyboard input.
 - **Shooting Mechanic:** The player can fire bullets in bursts.
-- **Zombie Behavior:** Zombies spawn at intervals, move toward the player, and attack upon collision.
+- **Zombie Behavior:** Demons spawn at intervals, move toward the player, and attack upon collision.
 - **Infinite Terrain:** Grass tiles shift seamlessly to simulate an infinite scrolling background.
 - **Score System:** Tracks and displays the current and high scores.
 - **Game Over Screen:** Displays when the player is overrun.
