@@ -19,7 +19,7 @@ Fear Nexus is a top-down shooter game where the player controls a character to s
 - **Infinite Terrain:** Grass tiles shift seamlessly to simulate an infinite scrolling background.
 - **Score System:** Tracks and displays the current and high scores.
 - **Game Over Screen:** Displays when the player is overrun.
-- **Animated Sprites:** For both player and zombies.
+- **Animated Sprites:** For both player and demons.
 
 ## Files Used
 - Player and zombie sprites: Located in `images/Top_Down_Survivor` and `images/tds_zombie`.
