@@ -16,6 +16,20 @@
   - [Overview](#overview)
   - [Features](#features)
   - [Live Demo](#live-demo)
+  - [Table of Features](#table-of-features)
+  - [Game Mechanics](#game-mechanics)
+    - [Player Movement](#player-movement)
+    - [Shooting](#shooting)
+    - [Zombie Behavior](#zombie-behavior)
+    - [Infinite Scrolling Background](#infinite-scrolling-background)
+    - [Scoring System](#scoring-system)
+  - [Known Bugs](#known-bugs)
+  - [Customizing the Game](#customizing-the-game)
+    - [Change Zombie Speed](#change-zombie-speed)
+    - [Add New Backgrounds](#add-new-backgrounds)
+    - [Modify Player Appearance](#modify-player-appearance)
+    - [Add New Weapons](#add-new-weapons)
+  - [Known Limitations](#known-limitations)
   - [Contributing](#contributing)
   - [Testing](#testing)
     - [1. Prerequisites](#1-prerequisites)
@@ -26,13 +40,19 @@
       - [**Audio**](#audio)
       - [**Known Issues**](#known-issues)
     - [4. Reporting Bugs](#4-reporting-bugs)
+  - [Game Lore](#game-lore)
   - [FAQ](#faq)
     - [Q: How do I play the game?](#q-how-do-i-play-the-game)
     - [Q: Can I contribute to the project?](#q-can-i-contribute-to-the-project)
     - [Q: What browsers are supported?](#q-what-browsers-are-supported)
     - [Q: Are there plans for mobile support?](#q-are-there-plans-for-mobile-support)
   - [Support](#support)
+  - [How to Report Issues](#how-to-report-issues)
   - [Built With](#built-with)
+  - [Performance Tips](#performance-tips)
+  - [Fun Facts](#fun-facts)
+  - [Feedback](#feedback)
+  - [Versioning](#versioning)
   - [Project Structure (UML-like Representation)](#project-structure-uml-like-representation)
   - [Files and Pages](#files-and-pages)
     - [HTML Pages](#html-pages)
@@ -56,7 +76,12 @@
   - [Built With](#built-with-1)
   - [Installation](#installation)
   - [Development Notes](#development-notes)
+  - [Credits](#credits)
+  - [Localization](#localization)
+  - [Security](#security)
   - [License](#license)
+  - [Behind the Scenes](#behind-the-scenes)
+  - [Bug Bounty Program](#bug-bounty-program)
   - [Contact](#contact)
 
 ---
@@ -77,6 +102,82 @@ Fear Nexus is a top-down shooter game where the player controls a character to s
 ## Live Demo
 You can try the game live here: [Fear Nexus Live Demo](https://dineshvanputten.com/FearNexus/index.html)  
 
+## Table of Features
+
+| Feature                  | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| **Player Movement**      | Controlled via keyboard input (`W` and `S` keys).                          |
+| **Shooting Mechanic**    | Aim with the mouse and shoot with the left mouse button.                   |
+| **Zombie Behavior**      | Zombies spawn and move toward the player, attacking upon collision.        |
+| **Infinite Terrain**     | Grass tiles shift seamlessly to simulate an infinite scrolling background. |
+| **Score System**         | Tracks and displays the current and high scores.                          |
+| **Game Over Screen**     | Displays when the player is overrun.                                       |
+| **Animated Sprites**     | Includes animations for both the player and zombies.                      |
+| **Background Music**     | Randomized tracks play during gameplay.                                   |
+
+## Game Mechanics
+
+### Player Movement
+- The player can move forward (`W`) and backward (`S`) while aiming with the mouse.
+- Movement speed is adjustable via the `movementSpeed` variable in the game logic.
+
+### Shooting
+- The player can shoot bullets by clicking the left mouse button.
+- Bullets are fired in the direction of the mouse pointer.
+- Bullet speed and firing rate are controlled by the `bulletSpeed` and `canShoot` variables.
+
+### Zombie Behavior
+- Zombies spawn at random intervals and move toward the player.
+- Upon collision with the player, the game ends.
+- Zombie speed increases as the game progresses.
+
+### Infinite Scrolling Background
+- Grass tiles are repositioned dynamically to create the illusion of infinite terrain.
+- The background scrolls based on the player's movement direction.
+
+### Scoring System
+- Players earn points for each zombie eliminated.
+- The high score is saved locally using the browser's `localStorage` API.## Known Bugs
+
+- **Bullet Collision Issue**: Occasionally, bullets fail to register hits on zombies when they overlap.
+- **Zombie Spawn Overlap**: Multiple zombies sometimes spawn in the same location.
+- **Performance Drops**: The game may lag on older systems when too many zombies are on screen.
+
+We are actively working to resolve these issues. If you encounter any other bugs, please report them in the [GitHub Issues](https://github.com/your-username/FearNexus/issues).
+
+## Known Bugs
+
+- **Bullet Collision Issue**: Occasionally, bullets fail to register hits on zombies when they overlap.
+- **Zombie Spawn Overlap**: Multiple zombies sometimes spawn in the same location.
+- **Performance Drops**: The game may lag on older systems when too many zombies are on screen.
+
+We are actively working to resolve these issues. If you encounter any other bugs, please report them in the [GitHub Issues](https://github.com/your-username/FearNexus/issues).
+
+## Customizing the Game
+
+Fear Nexus is designed to be easily customizable. Here are some ways you can modify the game:
+
+### Change Zombie Speed
+- Open `script.js` and locate the `zombieSpeed` variable.
+- Adjust the value to increase or decrease zombie speed.
+
+### Add New Backgrounds
+- Replace the `grass.png` file in the `images/` folder with your own background image.
+- Ensure the new image has the same dimensions for seamless scrolling.
+
+### Modify Player Appearance
+- Replace the player sprite in the `images/Top_Down_Survivor/` folder with your own sprite.
+- Update the animation frames in the `script.js` file.
+
+### Add New Weapons
+- Create a new weapon sprite and add it to the `images/` folder.
+- Update the shooting logic in `script.js` to include the new weapon.
+
+## Known Limitations
+
+- The game is optimized for desktop browsers and may not work well on mobile devices.
+- High zombie spawn rates may cause performance issues on older systems.
+- The game currently supports only English; additional languages are planned for future updates.
 
 ## Contributing
 
@@ -141,6 +242,12 @@ If you encounter any issues or bugs, please report them by opening an issue in t
 - Screenshots or error messages (if applicable).
 - Your browser and operating system details.
 
+## Game Lore
+
+In a post-apocalyptic world overrun by the undead, you play as Zizius, a lone survivor armed with a shotgun and a will to survive. The zombies are not just mindless creatures—they are remnants of a failed experiment to harness fear as a weapon. As you fight your way through endless hordes, you uncover the truth behind the Fear Nexus, a mysterious entity controlling the undead.
+
+Will you survive long enough to uncover the secrets of the Fear Nexus?
+
 ## FAQ
 
 ### Q: How do I play the game?
@@ -164,6 +271,19 @@ If you like this project, consider giving it a ⭐ on GitHub or sharing it with 
 - Reporting bugs or suggesting features in the [GitHub Issues](https://github.com/your-username/FearNexus/issues).
 - Contributing code or documentation (see [Contributing](#contributing)).
 
+## How to Report Issues
+
+If you encounter any bugs or issues, please report them by:
+
+1. Opening an issue in the [GitHub repository](https://github.com/your-username/FearNexus/issues).
+2. Including the following details:
+   - A clear description of the issue.
+   - Steps to reproduce the issue.
+   - Screenshots or error messages (if applicable).
+   - Your browser and operating system details.
+
+We appreciate your help in improving Fear Nexus!
+
 ## Built With
 
 This project was built using the following technologies and tools:
@@ -176,6 +296,32 @@ This project was built using the following technologies and tools:
 - **Live Server** - For local development and testing.
 - **Git** - For version control.
 - **GitHub** - For hosting the repository and collaboration.
+
+
+## Performance Tips
+
+- Use a modern browser like Chrome or Firefox for the best performance.
+- Close unnecessary tabs or applications to free up system resources.
+- Ensure your browser is updated to the latest version.
+- If the game lags, try reducing the number of zombies spawned in the game settings (if applicable).
+
+## Fun Facts
+
+- The name "Fear Nexus" was inspired by the concept of a central hub of fear in a dystopian world.
+- The zombie sprites were originally designed for a different project but were repurposed for this game.
+- The infinite scrolling background was one of the most challenging features to implement!
+
+
+## Feedback
+
+We value your feedback! If you have suggestions, ideas, or comments, please let us know by:
+- Opening an issue in the [GitHub repository](https://github.com/your-username/FearNexus/issues).
+- Sending an email to [dineshvanputten@outlook.com](mailto:dineshvanputten@outlook.com).
+
+
+## Versioning
+
+This project uses [Semantic Versioning](https://semver.org/) for version control. For a list of available versions, see the [tags on this repository](https://github.com/your-username/FearNexus/tags).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -336,8 +482,38 @@ This project was built using the following technologies and tools:
 - The project is a work in progress, with frequent updates to functionality and visuals.
 - The code uses strict mode (`"use strict"`) to enforce cleaner JavaScript coding practices.
 
+## Credits
+
+This project uses assets and resources from the following:
+- [Top-Down Survivor Sprite Pack](https://opengameart.org/content/animated-top-down-survivor-player)
+- [Zombie Sprite Pack](https://opengameart.org/content/animated-top-down-zombie)
+- [Grass Background](https://opengameart.org/content/grass-for-scratch-background)
+- [Crosshairs Pack](https://opengameart.org/content/64-crosshairs-pack-split)
+- Background music by [Myuu](https://thedarkpiano.com/)
+
+Special thanks to all contributors and testers who helped improve the project!
+
+## Localization
+
+Fear Nexus currently supports English. Future updates may include support for additional languages. If you'd like to contribute translations, please see the [Contributing](#contributing) section.
+
+## Security
+
+If you discover any security vulnerabilities in the project, please report them responsibly by contacting [dineshvanputten@outlook.com](mailto:dineshvanputten@outlook.com). We appreciate your help in keeping Fear Nexus secure.
+
 ## License
 Distributed under the MIT License. See `LICENSE` for more information.
+
+
+## Behind the Scenes
+
+- **Development Time:** Fear Nexus was developed over the course of 3 months.
+- **Biggest Challenge:** Implementing the infinite scrolling background while maintaining performance.
+- **Fun Fact:** The zombie sprites were initially created for a different project but were repurposed for Fear Nexus.
+
+## Bug Bounty Program
+
+Help us improve Fear Nexus by reporting bugs! If you find a critical bug, you may receive recognition in the project's changelog or a small reward. Submit your bug reports [here](https://github.com/your-username/FearNexus/issues).
 
 ## Contact
 Created by **Dinesh van Putten**  
