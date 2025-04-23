@@ -5,6 +5,7 @@
 ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 
+
 </div>
 
 # Fear Nexus Game Documentation
@@ -25,6 +26,12 @@
       - [**Audio**](#audio)
       - [**Known Issues**](#known-issues)
     - [4. Reporting Bugs](#4-reporting-bugs)
+  - [FAQ](#faq)
+    - [Q: How do I play the game?](#q-how-do-i-play-the-game)
+    - [Q: Can I contribute to the project?](#q-can-i-contribute-to-the-project)
+    - [Q: What browsers are supported?](#q-what-browsers-are-supported)
+    - [Q: Are there plans for mobile support?](#q-are-there-plans-for-mobile-support)
+  - [Support](#support)
   - [Built With](#built-with)
   - [Project Structure (UML-like Representation)](#project-structure-uml-like-representation)
   - [Files and Pages](#files-and-pages)
@@ -134,7 +141,28 @@ If you encounter any issues or bugs, please report them by opening an issue in t
 - Screenshots or error messages (if applicable).
 - Your browser and operating system details.
 
+## FAQ
+
+### Q: How do I play the game?
+A: Use the `W` and `S` keys to move, the mouse to aim, and the left mouse button to shoot.
+
+### Q: Can I contribute to the project?
+A: Yes! Please see the [Contributing](#contributing) section for details.
+
+### Q: What browsers are supported?
+A: The game works on modern browsers like Chrome, Firefox, and Edge.
+
+### Q: Are there plans for mobile support?
+A: Mobile support is planned for future updates.
+
 Thank you for helping improve Fear Nexus!
+
+## Support
+
+If you like this project, consider giving it a ⭐ on GitHub or sharing it with others. You can also support the development by:
+
+- Reporting bugs or suggesting features in the [GitHub Issues](https://github.com/your-username/FearNexus/issues).
+- Contributing code or documentation (see [Contributing](#contributing)).
 
 ## Built With
 
