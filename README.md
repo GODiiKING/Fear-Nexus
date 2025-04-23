@@ -352,7 +352,7 @@ This project is under development. Future updates will include:
 
 <!--Table of Contents-->
 ## Table of Contents
-- [Game Documentation: Top-Down Zombie Shooter](#game-documentation-top-down-zombie-shooter)
+- [Game Documentation: Top-Down Shooter (Fear Nexus)](#game-documentation-top-down-shooter-fear-nexus)
   - [Overview](#overview)
   - [Features](#features)
   - [Files Used](#files-used)
@@ -377,11 +377,10 @@ This project is under development. Future updates will include:
   - [Future Enhancements](#future-enhancements)
   - [Known Issues](#known-issues)
   - [Credits](#credits)
-  - [Zombie Shooter](#zombie-shooter)
+  - [Fear Nexus](#fear-nexus)
   - [Overview](#overview-1)
   - [Files Needed](#files-needed)
   - [Zip Files Version](#zip-files-version)
-  - [Features](#features-1)
   - [Gameplay](#gameplay)
   - [Design](#design)
   - [Project Structure](#project-structure)
