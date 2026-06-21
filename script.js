@@ -1,67 +1,23 @@
 "use strict";
 
 // ==========================================
-// 1. GLOBAL VARIABLES & STATE
-// ==========================================
-
-let player;
-let bullet1;
-let bullet2;
-let bullet3;
-let crosshair;
-let grass1;
-let grass2;
-let grass3;
-let grass4;
-let grass5;
-let grass6;
-let grass7;
-let grass8;
-let grass9;
-
-let bullets;
-let grassArray = [];
-
-let moveForward;
-let moveBackwards;
-let angle;
-let movementSpeed = 0.5;
-
-let highscore = 0;
-let score = 0;
-
-let gameOver = false;
-let restartScreen;
-
-let shootSound = new Audio('audio/sfx/shootaudio.mp3');
-let alienDeathSound = new Audio('audio/sfx/demondie.mp3');
-let alienSpeakSound = new Audio('audio/sfx/demontalk.mp3');
-let alienSpeakSound2 = new Audio('audio/sfx/demontalk2.mp3');
-let alienSpeakSound3 = new Audio('audio/sfx/demontalk3.mp3');
-let gameOverSound = new Audio('audio/sfx/gameoveraudio.mp3');
-
-let bulletAngle;
-let bulletSpeed = 25;
-let canShoot = true;
-let shootAnimationOver = true;
-let bulletActive = false;
-
-let currentMaxX = 1280;
-let currentMinX = -1280;
-let currentMaxY = 720;
-let currentMinY = -720;
-
-let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
-let imagesScale = 0.6;
-
-// ==========================================
-// 2. INITIALIZATION & GAME ENGINE
+// INITIALIZATION
 // ==========================================
 
 function startGame() {
+
     GameArea.start();
 
-    player = new Component(313 * imagesScale, 207 * imagesScale, playerSprite, 640 - (313 * imagesScale) / 2, 360 - (202 * imagesScale) / 2, "player", 0);
+    player = new Component(
+        313 * imagesScale,
+        207 * imagesScale,
+        playerSprite,
+        640 - (313 * imagesScale) / 2,
+        360 - (202 * imagesScale) / 2,
+        "player",
+        0
+    );
+
     grass1 = new Component(1280, 720, "images/bg4.jpg", -1280, 720, "grass");
     grass2 = new Component(1280, 720, "images/bg4.jpg", 0, 720, "grass");
     grass3 = new Component(1280, 720, "images/bg4.jpg", 1280, 720, "grass");
@@ -75,306 +31,177 @@ function startGame() {
     bullet1 = new Component(100, 2, "images/bullet1.png", -10, -2, "image");
     bullet2 = new Component(100, 2, "images/bullet2.png", -10, -2, "image");
     bullet3 = new Component(100, 2, "images/bullet1.png", -10, -2, "image");
-    crosshair = new Component(40, 40, "images/crosshair097.png", 640, 360, "image");
-    restartScreen = new Component(1280, 720, "images/gameoverbg.png", 0, 0, "image");
+
+    crosshair = new Component(
+        40,
+        40,
+        "images/crosshair097.png",
+        640,
+        360,
+        "image"
+    );
+
+    restartScreen = new Component(
+        1280,
+        720,
+        "images/gameoverbg.png",
+        0,
+        0,
+        "image"
+    );
 
     bullets = [bullet1, bullet2, bullet3];
-    grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];
+
+    grassArray = [
+        grass1,
+        grass2,
+        grass3,
+        grass4,
+        grass5,
+        grass6,
+        grass7,
+        grass8,
+        grass9
+    ];
 
     enemies = [];
-    spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
+
+    spawnEnemiesInterval = setInterval(
+        spawnEnemy,
+        getRandomInterval()
+    );
+
     score = 0;
     gameOver = false;
 
     window.addEventListener("keydown", handleMovementPress);
     window.addEventListener("keyup", handleMovementRelease);
     window.addEventListener("mousedown", Shoot);
+
 }
+
+
+// ==========================================
+// GAME AREA
+// ==========================================
 
 let GameArea = {
+
     canvas: document.createElement("canvas"),
-    start: function() {
+
+    start: function () {
+
         this.canvas.width = 1280;
         this.canvas.height = 720;
+
         this.context = this.canvas.getContext("2d");
+
         clearInterval(GameArea.interval);
+
         this.interval = setInterval(updateGameArea, 20);
+
         this.canvas.id = "Game-Window";
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+        document.body.insertBefore(
+            this.canvas,
+            document.body.childNodes[0]
+        );
+
         let h1Element = document.querySelector("h1.Game-Title");
-        h1Element.insertAdjacentElement("afterend", this.canvas);
+
+        h1Element.insertAdjacentElement(
+            "afterend",
+            this.canvas
+        );
     },
-    clear: function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-}
 
-// ==========================================
-// 3. COMPONENTS & RENDERING
-// ==========================================
+    clear: function () {
 
-function Component(width, height, source, x, y, type, angle = 0) {
-    this.type = type;
-    this.angle = angle;
-    this.width = width;
-    this.height = height;
-    this.x = x;
-    this.y = y;
-    this.imageLoaded = false;
+        this.context.clearRect(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+        );
 
-    if (type === "image" || type === "grass") {
-        this.image = new Image();
-        this.image.src = source;
-        this.image.onload = () => {
-            this.imageLoaded = true;
-        };
-    } else if (type === "player") {
-        this.image = new Image();
-        this.image.src = playerSprite;
-        this.image.onload = () => {
-            this.imageLoaded = true;
-        };
     }
 
-    this.update = function() {
-        const ctx = GameArea.context;
+};
 
-        if (gameOver === false) {
-            ctx.font = "50px Comic Sans MS";
-            ctx.fillStyle = "red";
-            ctx.textAlign = "center";
-            ctx.fillText(score.toString(), 640, 100);
-        } else {
-            ctx.font = "60px Comic Sans MS";
-            ctx.fillStyle = "red";
-            ctx.textAlign = "center";
-            ctx.fillText("High Score: " + highscore.toString(), 640, 700);
-        }
-
-        ctx.save();
-        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-        ctx.rotate(this.angle);
-
-        if (this.imageLoaded) {
-            ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
-        }
-
-        if (type === "grass") {
-            if (moveForward) {
-                if (!shootAnimationOver) {
-                    playerShootAnimationFunction();
-                } else {
-                    playerMovementAnimationFunction();
-                }
-                this.x -= movementSpeed * 10 * Math.cos(player.angle);
-                this.y -= movementSpeed * 10 * Math.sin(player.angle);
-                
-                bullet1.x -= movementSpeed * Math.cos(bulletAngle);
-                bullet1.y -= movementSpeed * Math.sin(bulletAngle);
-                bullet2.x -= movementSpeed * Math.cos(bulletAngle);
-                bullet2.y -= movementSpeed * Math.sin(bulletAngle);
-                bullet3.x -= movementSpeed * Math.cos(bulletAngle);
-                bullet3.y -= movementSpeed * Math.sin(bulletAngle);
-
-                for (let i = 0; i < enemies.length; i++) {
-                    enemies[i].x -= movementSpeed * Math.cos(player.angle);
-                    enemies[i].y -= movementSpeed * Math.sin(player.angle);
-                }
-
-                if (grassArray[4].x + currentMaxX > currentMaxX) {
-                    moveLeft();
-                    currentMaxX += 1280;
-                } else if (grassArray[4].x + currentMinX < currentMinX) {
-                    moveRight();
-                    currentMinX -= 1280;
-                }
-
-                if (grassArray[4].y + currentMaxY > currentMaxY) {
-                    moveDown();
-                    currentMaxY += 720;
-                } else if (grassArray[4].y + currentMinY < currentMinY) {
-                    moveUp();
-                    currentMinY -= 720;
-                }
-            } else if (moveBackwards) {
-                if (!shootAnimationOver) {
-                    playerShootAnimationFunction();
-                } else {
-                    playerMovementAnimationFunction();
-                }
-                this.x += movementSpeed * Math.cos(player.angle);
-                this.y += movementSpeed * Math.sin(player.angle);
-
-                bullet1.x += movementSpeed * Math.cos(bulletAngle);
-                bullet1.y += movementSpeed * Math.sin(bulletAngle);
-                bullet2.x += movementSpeed * Math.cos(bulletAngle);
-                bullet2.y += movementSpeed * Math.sin(bulletAngle);
-                bullet3.x += movementSpeed * Math.cos(bulletAngle);
-                bullet3.y += movementSpeed * Math.sin(bulletAngle);
-
-                for (let i = 0; i < enemies.length; i++) {
-                    enemies[i].x += movementSpeed * Math.cos(player.angle);
-                    enemies[i].y += movementSpeed * Math.sin(player.angle);
-                }
-
-                if (grassArray[4].x + currentMaxX > currentMaxX) {
-                    moveLeft();
-                    currentMaxX += 1280;
-                } else if (grassArray[4].x + currentMinX < currentMinX) {
-                    moveRight();
-                    currentMinX -= 1280;
-                }
-
-                if (grassArray[4].y + currentMaxY > currentMaxY) {
-                    moveDown();
-                    currentMaxY += 720;
-                } else if (grassArray[4].y + currentMinY < currentMinY) {
-                    moveUp();
-                    currentMinY -= 720;
-                }
-            } else {
-                if (shootAnimationOver) {
-                    playerIdleAnimationFunction();
-                } else {
-                    playerShootAnimationFunction();
-                }
-            }
-        }
-        ctx.restore();
-    };
-}
 
 // ==========================================
-// 4. CORE GAME LOOP & COLLISION LOGIC
+// MAIN LOOP
 // ==========================================
 
-function updateGameArea(){
+function updateGameArea() {
+
     GameArea.clear();
 
     let ctx = GameArea.context;
+
     ctx.fillText(score.toString(), 640, 60);
 
-    onmousemove = function(e) {
-        let rect = GameArea.canvas.getBoundingClientRect();
-        angle = Math.atan2(e.clientY-rect.top - player.y-150/2, e.clientX-rect.left - player.x-256/2);
-        player.angle = angle; 
+    onmousemove = function (e) {
 
-        crosshair.x = e.clientX-rect.left-20; 
-        crosshair.y = e.clientY-rect.top-17; 
+        let rect = GameArea.canvas.getBoundingClientRect();
+
+        angle = Math.atan2(
+            e.clientY - rect.top - player.y - 150 / 2,
+            e.clientX - rect.left - player.x - 256 / 2
+        );
+
+        player.angle = angle;
+
+        crosshair.x = e.clientX - rect.left - 20;
+        crosshair.y = e.clientY - rect.top - 17;
+
     };
 
-    if (bulletActive) {
-        let bullet1Turn = ((Math.random()) * 3) * Math.PI / 180; 
-        let bullet2Turn = 0; 
-        let bullet3Turn = ((Math.random() - 1) * 3) * Math.PI / 180; 
+    updateBullets();
 
-        bullet1.x += bulletSpeed * Math.cos(bulletAngle + bullet1Turn); 
-        bullet1.y += bulletSpeed * Math.sin(bulletAngle + bullet1Turn); 
+    checkBulletCollisions();
 
-        bullet2.x += bulletSpeed * Math.cos(bulletAngle + bullet2Turn); 
-        bullet2.y += bulletSpeed * Math.sin(bulletAngle + bullet2Turn); 
+    checkEnemyPlayerCollisions();
 
-        bullet3.x += bulletSpeed * Math.cos(bulletAngle + bullet3Turn); 
-        bullet3.y += bulletSpeed * Math.sin(bulletAngle + bullet3Turn); 
-
-        if(bullet1.x > 1280) { canShoot = true; }
-        else if(bullet1.x < 0) { canShoot = true; }
-        else if(bullet1.y < 0) { canShoot = true; }
-        else if(bullet1.y > 720) { canShoot = true; }
-    }
-
-    for (let j = 0; j < bullets.length; j++) {
-        for (let i = 0; i < enemies.length; i++) {
-            let isHitX = bullets[j].x > enemies[i].x + 27 * imagesScale && bullets[j].x < enemies[i].x + (27 + 206) * imagesScale;
-            let isHitY = bullets[j].y > enemies[i].y + 77 * imagesScale && bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
-
-            if (isHitX && isHitY) {
-                shootSound.pause();
-                shootSound.currentTime = 0;
-                shootSound.volume = 0.5;
-                shootSound.play();
-
-                alienDeathSound.volume = 0.9;
-                if (alienDeathSound.paused) {
-                    alienDeathSound.play();
-                }
-
-                let randomSpeak = Math.random();
-                let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
-                soundToPlay.volume = 0.9;
-                soundToPlay.play();
-
-                enemies.splice(i, 1);
-                enemiesWaitTime.splice(i, 1);
-                enemiesAnimationPosition.splice(i, 1);
-                enemiesPlayerCollision.splice(i, 1);
-
-                score += 1;
-
-                bullets[j].x = 9999;
-                bullets[j].y = 9999;
-            }
-        }
-    }
-
-    for (let i = 0; i < enemies.length; i++) {
-        let playerXStart = 640 - 37 - player.width * imagesScale;
-        let playerXEnd = 640 + (256 - 37) * imagesScale - player.width * imagesScale;
-        let playerYStart = 360 - 38 * imagesScale - player.height * imagesScale - 80;
-        let playerYEnd = 360 + (150 - 38) * imagesScale - player.height * imagesScale + 50;
-
-        let inRangeX = enemies[i].x + 27 * imagesScale > playerXStart && enemies[i].x + 27 * imagesScale < playerXEnd;
-        let inRangeY = enemies[i].y + 79 * imagesScale > playerYStart && enemies[i].y + 79 * imagesScale < playerYEnd;
-
-        if (inRangeX && inRangeY) {
-            enemiesPlayerCollision[i] = false;
-            enemyAttackAnimationFunction(i);
-        } else {
-            if (enemiesPlayerCollision[i] === false) {
-                enemiesAnimationPosition[i] = 0;
-            }
-            enemiesPlayerCollision[i] = true;
-        }
-    }
-
-    for (let i = 0; i < enemies.length; i++) {
-        if (enemiesPlayerCollision[i]) {
-            let dx = enemies[i].x - player.x;
-            let dy = enemies[i].y - player.y;
-            let angleToPlayer = Math.atan2(dy, dx);
-            
-            enemies[i].angle = angleToPlayer + Math.PI;
-            
-            enemies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
-            enemies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
-            
-            enemyMovementAnimationFunction(i);
-        }
-    }
+    moveEnemies();
 
     grassArray.forEach(grass => grass.update());
+
     player.update();
+
     bullets.forEach(bullet => bullet.update());
+
     crosshair.update();
 
-    for(let i = 0; i < enemies.length; i++) {
-        enemies[i].update(); 
+    for (let i = 0; i < enemies.length; i++) {
+        enemies[i].update();
     }
 
-    if(gameOver) {
-        restartScreen.update(); 
-        ctx.fillText("High Score: " + highscore.toString(), 640, 650); 
+    if (gameOver) {
+
+        restartScreen.update();
+
+        ctx.fillText(
+            "High Score: " + highscore.toString(),
+            640,
+            650
+        );
+
     }
+
 }
 
+
 // ==========================================
-// 5. GAME OVER LOGIC
+// GAME OVER
 // ==========================================
 
 function endGame() {
-    gameOver = true; 
-    
-    if(highscore < score) {
-        highscore = score; 
+
+    gameOver = true;
+
+    if (highscore < score) {
+        highscore = score;
     }
+
 }
