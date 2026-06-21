@@ -20,18 +20,12 @@ let grass8;
 let grass9;
 
 let bullets;
-let enemies = [];
 let grassArray = [];
 
 let moveForward;
 let moveBackwards;
 let angle;
 let movementSpeed = 0.5;
-
-let enemiesWaitTime = [];
-let enemiesAnimationPosition = [];
-let enemiesPlayerCollision = [];
-let spawnEnemiesInterval;
 
 let highscore = 0;
 let score = 0;
@@ -57,13 +51,11 @@ let currentMinX = -1280;
 let currentMaxY = 720;
 let currentMinY = -720;
 
-// Note: Asset paths left as "zombie" so your images still load correctly!
 let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
-let enemySprite = "images/tds_zombie-Copy/export/Movement/skeleton-move_0.png";
 let imagesScale = 0.6;
 
 // ==========================================
-// 2. ANIMATION ARRAYS
+// 2. PLAYER ANIMATION ARRAYS
 // ==========================================
 
 let playerMovementAnimation = [];
@@ -82,18 +74,6 @@ let playerIdleAnimation = [];
 for (let i = 0; i < 20; i++) {
     playerIdleAnimation.push(new Image());
     playerIdleAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_" + i.toString() + ".png";
-}
-
-let enemyMovementAnimation = [];
-for (let i = 0; i < 16; i++) {
-    enemyMovementAnimation.push(new Image());
-    enemyMovementAnimation[i].src = "images/tds_zombie-Copy/export/Movement/skeleton-move_" + i.toString() + ".png";
-}
-
-let enemyAttackAnimation = [];
-for (let i = 0; i < 8; i++) {
-    enemyAttackAnimation.push(new Image());
-    enemyAttackAnimation[i].src = "images/tds_zombie-Copy/export/Attack/skeleton-attack_" + i.toString() + ".png";
 }
 
 // ==========================================
@@ -123,6 +103,7 @@ function startGame() {
     bullets = [bullet1, bullet2, bullet3];
     grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];
 
+    // Enemy variables are populated from enemy.js
     enemies = [];
     spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
     score = 0;
@@ -502,55 +483,7 @@ function Shoot(event) {
 }
 
 // ==========================================
-// 9. ENEMY LOGIC & SPAWNING
-// ==========================================
-
-function spawnEnemy() {
-    let newEnemy = new Component(
-        288 * imagesScale, 
-        311 * imagesScale, 
-        enemySprite, 
-        640 - (288 * imagesScale) / 2, 
-        360 - (311 * imagesScale) / 2, 
-        "image"
-    );
-
-    let randomPosition = Math.floor(Math.random() * 4) + 1;
-    let eW = 288 * imagesScale;
-    let eH = 311 * imagesScale;
-
-    if (randomPosition === 1) {
-        newEnemy.x = -eW / 2;
-        newEnemy.y = Math.random() * 720 - eH / 2;
-    } else if (randomPosition === 2) {
-        newEnemy.x = 1280 - eW / 2;
-        newEnemy.y = Math.random() * 720 - eH / 2;
-    } else if (randomPosition === 3) {
-        newEnemy.x = Math.random() * 1280 - eW / 2;
-        newEnemy.y = 720 - eH / 2;
-    } else if (randomPosition === 4) {
-        newEnemy.x = Math.random() * 1280 - eW / 2;
-        newEnemy.y = -eH / 2;
-    }
-
-    enemies.push(newEnemy);
-    enemiesWaitTime.push(5);
-    enemiesAnimationPosition.push(0);
-    enemiesPlayerCollision.push(true);
-}
-
-let difficulty = 0.25;
-let maxTime = 5000;
-let minTime = 100;
-
-function getRandomInterval() {
-    maxTime -= maxTime * difficulty;
-    minTime -= minTime * difficulty;
-    return Math.floor(Math.random() * (maxTime - minTime + 1) + minTime);
-}
-
-// ==========================================
-// 10. ANIMATION CONTROLLERS
+// 9. PLAYER ANIMATION CONTROLLERS
 // ==========================================
 
 let i = 0;
@@ -589,29 +522,5 @@ function playerIdleAnimationFunction() {
         waitTime = 30;
     } else {
         waitTime--;
-    }
-}
-
-function enemyMovementAnimationFunction(enemyNum) {
-    if (enemiesWaitTime[enemyNum] === 0) {
-        enemies[enemyNum].image.src = enemyMovementAnimation[enemiesAnimationPosition[enemyNum] % enemyMovementAnimation.length].src;
-        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyMovementAnimation.length;
-        enemiesWaitTime[enemyNum] = 5;
-    } else {
-        enemiesWaitTime[enemyNum]--;
-    }
-}
-
-function enemyAttackAnimationFunction(enemyNum) {
-    if (enemiesWaitTime[enemyNum] === 0) {
-        enemies[enemyNum].image.src = enemyAttackAnimation[enemiesAnimationPosition[enemyNum] % enemyAttackAnimation.length].src;
-        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyAttackAnimation.length;
-        enemiesWaitTime[enemyNum] = 5;
-
-        if (enemies[enemyNum].image.src === enemyAttackAnimation[6].src && enemiesPlayerCollision[enemyNum] === false) {
-            endGame();
-        }
-    } else {
-        enemiesWaitTime[enemyNum]--;
     }
 }

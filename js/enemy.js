@@ -1,48 +1,101 @@
 "use strict";
 
-/**
- * Base class for all hostile entities.
- * Handles foundational properties like positioning, rendering, and base state.
- */
-export class enemy {
-    constructor(x, y, width, height, type, initialSprite) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.type = type;
-        this.angle = 0;
-        
-        // Image setup and async load tracking
-        this.image = new Image();
-        this.image.src = initialSprite;
-        this.imageLoaded = false;
-        this.image.onload = () => { 
-            this.imageLoaded = true; 
-        };
+// ==========================================
+// ENEMY STATE & VARIABLES
+// ==========================================
+let enemies = [];
+let enemiesWaitTime = [];
+let enemiesAnimationPosition = [];
+let enemiesPlayerCollision = [];
+let spawnEnemiesInterval;
 
-        // Encapsulated state tracking variables (replacing your old parallel arrays)
-        this.waitTime = 5;
-        this.animationPosition = 0;
-        
-        // True means NO collision yet, matching your original logic
-        this.playerCollision = true; 
+let enemySprite = "images/tds_zombie-Copy/export/Movement/skeleton-move_0.png";
+
+let difficulty = 0.25;
+let maxTime = 5000;
+let minTime = 100;
+
+// ==========================================
+// ENEMY ANIMATION ASSETS
+// ==========================================
+let enemyMovementAnimation = [];
+for (let i = 0; i < 16; i++) {
+    enemyMovementAnimation.push(new Image());
+    enemyMovementAnimation[i].src = "images/tds_zombie-Copy/export/Movement/skeleton-move_" + i.toString() + ".png";
+}
+
+let enemyAttackAnimation = [];
+for (let i = 0; i < 8; i++) {
+    enemyAttackAnimation.push(new Image());
+    enemyAttackAnimation[i].src = "images/tds_zombie-Copy/export/Attack/skeleton-attack_" + i.toString() + ".png";
+}
+
+// ==========================================
+// ENEMY LOGIC & SPAWNING
+// ==========================================
+function spawnEnemy() {
+    let newEnemy = new Component(
+        288 * imagesScale, 
+        311 * imagesScale, 
+        enemySprite, 
+        640 - (288 * imagesScale) / 2, 
+        360 - (311 * imagesScale) / 2, 
+        "image"
+    );
+
+    let randomPosition = Math.floor(Math.random() * 4) + 1;
+    let eW = 288 * imagesScale;
+    let eH = 311 * imagesScale;
+
+    if (randomPosition === 1) {
+        newEnemy.x = -eW / 2;
+        newEnemy.y = Math.random() * 720 - eH / 2;
+    } else if (randomPosition === 2) {
+        newEnemy.x = 1280 - eW / 2;
+        newEnemy.y = Math.random() * 720 - eH / 2;
+    } else if (randomPosition === 3) {
+        newEnemy.x = Math.random() * 1280 - eW / 2;
+        newEnemy.y = 720 - eH / 2;
+    } else if (randomPosition === 4) {
+        newEnemy.x = Math.random() * 1280 - eW / 2;
+        newEnemy.y = -eH / 2;
     }
 
-    /**
-     * Renders the enemy on the canvas context with rotational tracking.
-     * @param {CanvasRenderingContext2D} ctx - The canvas rendering environment target.
-     */
-    update(ctx) {
-        ctx.save();
-        // Pivot around the center point for seamless rotation tracking
-        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-        ctx.rotate(this.angle);
-        
-        if (this.imageLoaded) {
-            ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+    enemies.push(newEnemy);
+    enemiesWaitTime.push(5);
+    enemiesAnimationPosition.push(0);
+    enemiesPlayerCollision.push(true);
+}
+
+function getRandomInterval() {
+    maxTime -= maxTime * difficulty;
+    minTime -= minTime * difficulty;
+    return Math.floor(Math.random() * (maxTime - minTime + 1) + minTime);
+}
+
+// ==========================================
+// ENEMY ANIMATION CONTROLLERS
+// ==========================================
+function enemyMovementAnimationFunction(enemyNum) {
+    if (enemiesWaitTime[enemyNum] === 0) {
+        enemies[enemyNum].image.src = enemyMovementAnimation[enemiesAnimationPosition[enemyNum] % enemyMovementAnimation.length].src;
+        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyMovementAnimation.length;
+        enemiesWaitTime[enemyNum] = 5;
+    } else {
+        enemiesWaitTime[enemyNum]--;
+    }
+}
+
+function enemyAttackAnimationFunction(enemyNum) {
+    if (enemiesWaitTime[enemyNum] === 0) {
+        enemies[enemyNum].image.src = enemyAttackAnimation[enemiesAnimationPosition[enemyNum] % enemyAttackAnimation.length].src;
+        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyAttackAnimation.length;
+        enemiesWaitTime[enemyNum] = 5;
+
+        if (enemies[enemyNum].image.src === enemyAttackAnimation[6].src && enemiesPlayerCollision[enemyNum] === false) {
+            endGame();
         }
-        
-        ctx.restore();
+    } else {
+        enemiesWaitTime[enemyNum]--;
     }
 }
