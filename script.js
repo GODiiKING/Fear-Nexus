@@ -55,29 +55,7 @@ let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle
 let imagesScale = 0.6;
 
 // ==========================================
-// 2. PLAYER ANIMATION ARRAYS
-// ==========================================
-
-let playerMovementAnimation = [];
-for (let i = 0; i < 20; i++) {
-    playerMovementAnimation.push(new Image());
-    playerMovementAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/move/survivor-move_shotgun_" + i.toString() + ".png";
-}
-
-let playerShootAnimation = [];
-for (let i = 0; i < 10; i++) {
-    playerShootAnimation.push(new Image());
-    playerShootAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/shoot/survivor-shoot_shotgun_" + i.toString() + ".png";
-}
-
-let playerIdleAnimation = [];
-for (let i = 0; i < 20; i++) {
-    playerIdleAnimation.push(new Image());
-    playerIdleAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_" + i.toString() + ".png";
-}
-
-// ==========================================
-// 3. INITIALIZATION & GAME ENGINE
+// 2. INITIALIZATION & GAME ENGINE
 // ==========================================
 
 function startGame() {
@@ -103,7 +81,6 @@ function startGame() {
     bullets = [bullet1, bullet2, bullet3];
     grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];
 
-    // Enemy variables are populated from enemy.js
     enemies = [];
     spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
     score = 0;
@@ -133,7 +110,7 @@ let GameArea = {
 }
 
 // ==========================================
-// 4. COMPONENTS & RENDERING
+// 3. COMPONENTS & RENDERING
 // ==========================================
 
 function Component(width, height, source, x, y, type, angle = 0) {
@@ -268,7 +245,7 @@ function Component(width, height, source, x, y, type, angle = 0) {
 }
 
 // ==========================================
-// 5. CORE GAME LOOP & COLLISION LOGIC
+// 4. CORE GAME LOOP & COLLISION LOGIC
 // ==========================================
 
 function updateGameArea(){
@@ -391,7 +368,7 @@ function updateGameArea(){
 }
 
 // ==========================================
-// 6. GAME OVER LOGIC
+// 5. GAME OVER LOGIC
 // ==========================================
 
 function endGame() {
@@ -399,128 +376,5 @@ function endGame() {
     
     if(highscore < score) {
         highscore = score; 
-    }
-}
-
-// ==========================================
-// 7. INPUT HANDLING
-// ==========================================
-
-function handleMovementPress(event) {
-    const key = event.keyCode;
-
-    if (key === 87) {
-        moveForward = true;
-    } else if (key === 83) {
-        moveBackwards = true;
-    }
-
-    if (key === 82 && gameOver) {
-        startGame();
-    }
-}
-
-function handleMovementRelease(event) {
-    let key = event.keyCode;
-
-    if (key === 87) {
-        moveForward = false;
-    } else if (key === 83) {
-        moveBackwards = false;
-    }
-}
-
-// ==========================================
-// 8. BACKGROUND MOVEMENT (CAMERA)
-// ==========================================
-
-function moveLeft() {
-    grassArray[2].x -= 3840;
-    grassArray[5].x -= 3840;
-    grassArray[8].x -= 3840;
-
-    grassArray = [grassArray[2], grassArray[0], grassArray[1], grassArray[5], grassArray[3], grassArray[4], grassArray[8], grassArray[6], grassArray[7]];
-}
-
-function moveRight() {
-    grassArray[0].x += 3840;
-    grassArray[3].x += 3840;
-    grassArray[6].x += 3840;
-
-    grassArray = [grassArray[1], grassArray[2], grassArray[0], grassArray[4], grassArray[5], grassArray[3], grassArray[7], grassArray[8], grassArray[6]];
-}
-
-function moveUp() {
-    grassArray[6].y += 2160;
-    grassArray[7].y += 2160;
-    grassArray[8].y += 2160;
-
-    grassArray = [grassArray[6], grassArray[7], grassArray[8], grassArray[0], grassArray[1], grassArray[2], grassArray[3], grassArray[4], grassArray[5]];
-}
-
-function moveDown() {
-    grassArray[0].y -= 2160;
-    grassArray[1].y -= 2160;
-    grassArray[2].y -= 2160;
-
-    grassArray = [grassArray[3], grassArray[4], grassArray[5], grassArray[6], grassArray[7], grassArray[8], grassArray[0], grassArray[1], grassArray[2]];
-}
-
-function Shoot(event) {
-    if (event.button === 0 && canShoot && !gameOver) {
-        shootAnimationOver = false;
-        bulletActive = true;
-        bulletAngle = player.angle;
-
-        bullets.forEach(bullet => {
-            bullet.x = 640;
-            bullet.y = 360;
-            bullet.angle = player.angle;
-        });
-
-        canShoot = false;
-    }
-}
-
-// ==========================================
-// 9. PLAYER ANIMATION CONTROLLERS
-// ==========================================
-
-let i = 0;
-let r = 0;
-let waitTime = 10;
-
-function playerMovementAnimationFunction() {
-    if (waitTime === 0) {
-        playerSprite = playerMovementAnimation[i % playerMovementAnimation.length].src;
-        i = (i + 1) % playerMovementAnimation.length;
-        waitTime = 10;
-    } else {
-        waitTime--;
-    }
-}
-
-function playerShootAnimationFunction() {
-    if (waitTime === 0) {
-        playerSprite = playerShootAnimation[i % playerShootAnimation.length].src;
-        i = (i + 1) % playerShootAnimation.length;
-        waitTime = 20;
-
-        if (playerSprite === playerShootAnimation[2].src) {
-            shootAnimationOver = true;
-            console.log("done");
-        }
-    } else {
-        waitTime--;
-    }
-}
-
-function playerIdleAnimationFunction() {
-    if (waitTime === 0) {
-        playerSprite = playerIdleAnimation[i % playerIdleAnimation.length].src;
-        i = (i + 1) % playerIdleAnimation.length;
-        waitTime = 30;
-    } else {
-        waitTime--;
     }
 }
