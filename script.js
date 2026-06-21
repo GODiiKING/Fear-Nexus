@@ -18,24 +18,24 @@ function startGame() {
         0
     );
 
-    grass1 = new Component(1280, 720, "images/bg4.jpg", -1280, 720, "grass");
-    grass2 = new Component(1280, 720, "images/bg4.jpg", 0, 720, "grass");
-    grass3 = new Component(1280, 720, "images/bg4.jpg", 1280, 720, "grass");
-    grass4 = new Component(1280, 720, "images/bg4.jpg", -1280, 0, "grass");
-    grass5 = new Component(1280, 720, "images/bg3.jpg", 0, 0, "grass");
-    grass6 = new Component(1280, 720, "images/bg4.jpg", 1280, 0, "grass");
-    grass7 = new Component(1280, 720, "images/bg4.jpg", -1280, -720, "grass");
-    grass8 = new Component(1280, 720, "images/bg2-Copy.jpg", 0, -720, "grass");
-    grass9 = new Component(1280, 720, "images/bg4.jpg", 1280, -720, "grass");
+    grass1 = new Component(1280, 720, "images/background/bg3.png", -1280, 720, "grass");
+    grass2 = new Component(1280, 720, "images/background/bg3.png", 0, 720, "grass");
+    grass3 = new Component(1280, 720, "images/background/bg3.png", 1280, 720, "grass");
+    grass4 = new Component(1280, 720, "images/background/bg3.png", -1280, 0, "grass");
+    grass5 = new Component(1280, 720, "images/background/bg2.png", 0, 0, "grass");
+    grass6 = new Component(1280, 720, "images/background/bg3.png", 1280, 0, "grass");
+    grass7 = new Component(1280, 720, "images/background/bg3.png", -1280, -720, "grass");
+    grass8 = new Component(1280, 720, "images/background/bg1.png", 0, -720, "grass");
+    grass9 = new Component(1280, 720, "images/background/bg3.png", 1280, -720, "grass");
 
-    bullet1 = new Component(100, 2, "images/bullet1.png", -10, -2, "image");
-    bullet2 = new Component(100, 2, "images/bullet2.png", -10, -2, "image");
-    bullet3 = new Component(100, 2, "images/bullet1.png", -10, -2, "image");
+    bullet1 = new Component(100, 2, "images/bullet/bullet1.png", -10, -2, "image");
+    bullet2 = new Component(100, 2, "images/bullet/bullet2.png", -10, -2, "image");
+    bullet3 = new Component(100, 2, "images/bullet/bullet1.png", -10, -2, "image");
 
     crosshair = new Component(
         40,
         40,
-        "images/crosshair097.png",
+        "images/crosshair/crosshair.png",
         640,
         360,
         "image"
@@ -44,7 +44,7 @@ function startGame() {
     restartScreen = new Component(
         1280,
         720,
-        "images/gameoverbg.png",
+        "images/gameover/gameoverbg.png",
         0,
         0,
         "image"
