@@ -1,5 +1,9 @@
 "use strict";
 
+// ==========================================
+// 1. GLOBAL VARIABLES & STATE
+// ==========================================
+
 let player;
 let bullet1;
 let bullet2;
@@ -16,7 +20,7 @@ let grass8;
 let grass9;
 
 let bullets;
-let zombies = [];
+let enemies = [];
 let grassArray = [];
 
 let moveForward;
@@ -24,10 +28,10 @@ let moveBackwards;
 let angle;
 let movementSpeed = 0.5;
 
-let zombiesWaitTime = [];
-let zombiesAnimationPosition = [];
-let zombiesPlayerCollision = [];
-let spawnZombiesInterval;
+let enemiesWaitTime = [];
+let enemiesAnimationPosition = [];
+let enemiesPlayerCollision = [];
+let spawnEnemiesInterval;
 
 let highscore = 0;
 let score = 0;
@@ -51,9 +55,16 @@ let bulletActive = false;
 let currentMaxX = 1280;
 let currentMinX = -1280;
 let currentMaxY = 720;
-let currentMinY = -720;let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
-let zombieSprite = "images/tds_zombie-Copy/export/Movement/skeleton-move_0.png";
+let currentMinY = -720;
+
+// Note: Asset paths left as "zombie" so your images still load correctly!
+let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
+let enemySprite = "images/tds_zombie-Copy/export/Movement/skeleton-move_0.png";
 let imagesScale = 0.6;
+
+// ==========================================
+// 2. ANIMATION ARRAYS
+// ==========================================
 
 let playerMovementAnimation = [];
 for (let i = 0; i < 20; i++) {
@@ -73,17 +84,21 @@ for (let i = 0; i < 20; i++) {
     playerIdleAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_" + i.toString() + ".png";
 }
 
-let zombieMovementAnimation = [];
+let enemyMovementAnimation = [];
 for (let i = 0; i < 16; i++) {
-    zombieMovementAnimation.push(new Image());
-    zombieMovementAnimation[i].src = "images/tds_zombie-Copy/export/Movement/skeleton-move_" + i.toString() + ".png";
+    enemyMovementAnimation.push(new Image());
+    enemyMovementAnimation[i].src = "images/tds_zombie-Copy/export/Movement/skeleton-move_" + i.toString() + ".png";
 }
 
-let zombieAttackAnimation = [];
+let enemyAttackAnimation = [];
 for (let i = 0; i < 8; i++) {
-    zombieAttackAnimation.push(new Image());
-    zombieAttackAnimation[i].src = "images/tds_zombie-Copy/export/Attack/skeleton-attack_" + i.toString() + ".png";
+    enemyAttackAnimation.push(new Image());
+    enemyAttackAnimation[i].src = "images/tds_zombie-Copy/export/Attack/skeleton-attack_" + i.toString() + ".png";
 }
+
+// ==========================================
+// 3. INITIALIZATION & GAME ENGINE
+// ==========================================
 
 function startGame() {
     GameArea.start();
@@ -108,8 +123,8 @@ function startGame() {
     bullets = [bullet1, bullet2, bullet3];
     grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];
 
-    zombies = [];
-    spawnZombiesInterval = setInterval(spawnZombie, getRandomInterval());
+    enemies = [];
+    spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
     score = 0;
     gameOver = false;
 
@@ -135,6 +150,10 @@ let GameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
+
+// ==========================================
+// 4. COMPONENTS & RENDERING
+// ==========================================
 
 function Component(width, height, source, x, y, type, angle = 0) {
     this.type = type;
@@ -199,9 +218,9 @@ function Component(width, height, source, x, y, type, angle = 0) {
                 bullet3.x -= movementSpeed * Math.cos(bulletAngle);
                 bullet3.y -= movementSpeed * Math.sin(bulletAngle);
 
-                for (let i = 0; i < zombies.length; i++) {
-                    zombies[i].x -= movementSpeed * Math.cos(player.angle);
-                    zombies[i].y -= movementSpeed * Math.sin(player.angle);
+                for (let i = 0; i < enemies.length; i++) {
+                    enemies[i].x -= movementSpeed * Math.cos(player.angle);
+                    enemies[i].y -= movementSpeed * Math.sin(player.angle);
                 }
 
                 if (grassArray[4].x + currentMaxX > currentMaxX) {
@@ -235,9 +254,9 @@ function Component(width, height, source, x, y, type, angle = 0) {
                 bullet3.x += movementSpeed * Math.cos(bulletAngle);
                 bullet3.y += movementSpeed * Math.sin(bulletAngle);
 
-                for (let i = 0; i < zombies.length; i++) {
-                    zombies[i].x += movementSpeed * Math.cos(player.angle);
-                    zombies[i].y += movementSpeed * Math.sin(player.angle);
+                for (let i = 0; i < enemies.length; i++) {
+                    enemies[i].x += movementSpeed * Math.cos(player.angle);
+                    enemies[i].y += movementSpeed * Math.sin(player.angle);
                 }
 
                 if (grassArray[4].x + currentMaxX > currentMaxX) {
@@ -267,167 +286,144 @@ function Component(width, height, source, x, y, type, angle = 0) {
     };
 }
 
+// ==========================================
+// 5. CORE GAME LOOP & COLLISION LOGIC
+// ==========================================
+
 function updateGameArea(){
-    // Clear the canvas to prepare for the next frame
     GameArea.clear();
 
-    //Game context
     let ctx = GameArea.context;
-    ctx.fillText(score.toString(), 640, 60); // Display the score at the top center of the screen
+    ctx.fillText(score.toString(), 640, 60);
 
-    //On mouse moved:
-    // On mouse move, track the player's rotation and crosshair position
     onmousemove = function(e) {
-        // Get the bounding rectangle of the canvas to calculate the mouse position relative to the canvas
-        //Find players rotation
         let rect = GameArea.canvas.getBoundingClientRect();
-
-         // Calculate the angle of rotation for the player based on the mouse position
-        // atan2 is used to calculate the angle between the player and the mouse position
         angle = Math.atan2(e.clientY-rect.top - player.y-150/2, e.clientX-rect.left - player.x-256/2);
-        player.angle = angle; // Set the calculated angle to the player’s angle
+        player.angle = angle; 
 
-        //Set crosshair's position
-        // Update the crosshair position to follow the mouse
-        crosshair.x = e.clientX-rect.left-20;  // Subtract 20 to center the crosshair on the cursor
-        crosshair.y = e.clientY-rect.top-17; // Subtract 17 to center the crosshair on the cursor
+        crosshair.x = e.clientX-rect.left-20; 
+        crosshair.y = e.clientY-rect.top-17; 
     };
 
-    //Move bullets
-    // Move bullets if they are active
     if (bulletActive) {
-    // Randomly adjust the direction of each bullet to create spread effect
-    let bullet1Turn = ((Math.random()) * 3) * Math.PI / 180; // Bullet 1 will randomly turn by a small angle between 0 and 3 degrees
-    let bullet2Turn = 0; // Bullet 2 will have no turn (fired straight)
-    let bullet3Turn = ((Math.random() - 1) * 3) * Math.PI / 180; // Bullet 3 will randomly turn by a small angle between -3 and 0 degrees
+        let bullet1Turn = ((Math.random()) * 3) * Math.PI / 180; 
+        let bullet2Turn = 0; 
+        let bullet3Turn = ((Math.random() - 1) * 3) * Math.PI / 180; 
 
-    // Update the position of bullet 1 with random direction adjustment
-    bullet1.x += bulletSpeed * Math.cos(bulletAngle + bullet1Turn); // Update the x position based on the angle and speed
-    bullet1.y += bulletSpeed * Math.sin(bulletAngle + bullet1Turn); // Update the y position based on the angle and speed
+        bullet1.x += bulletSpeed * Math.cos(bulletAngle + bullet1Turn); 
+        bullet1.y += bulletSpeed * Math.sin(bulletAngle + bullet1Turn); 
 
-    // Update the position of bullet 2 with no random direction adjustment (straight shot)
-    bullet2.x += bulletSpeed * Math.cos(bulletAngle + bullet2Turn); // Update the x position based on the angle and speed
-    bullet2.y += bulletSpeed * Math.sin(bulletAngle + bullet2Turn); // Update the y position based on the angle and speed
+        bullet2.x += bulletSpeed * Math.cos(bulletAngle + bullet2Turn); 
+        bullet2.y += bulletSpeed * Math.sin(bulletAngle + bullet2Turn); 
 
-    // Update the position of bullet 3 with random direction adjustment
-    bullet3.x += bulletSpeed * Math.cos(bulletAngle + bullet3Turn); // Update the x position based on the angle and speed
-    bullet3.y += bulletSpeed * Math.sin(bulletAngle + bullet3Turn); // Update the y position based on the angle and speed
+        bullet3.x += bulletSpeed * Math.cos(bulletAngle + bullet3Turn); 
+        bullet3.y += bulletSpeed * Math.sin(bulletAngle + bullet3Turn); 
 
-        //Reload
-        // Reload mechanism to check if bullets are off-screen and allow shooting again
-        if(bullet1.x > 1280)
-        { // If bullet1 goes past the right edge of the screen (x > 1280)
-            canShoot = true; // Allow shooting again
-        }
-        else if(bullet1.x < 0)
-        { // If bullet1 goes past the left edge of the screen (x < 0)
-            canShoot = true; // Allow shooting again
-        }
-        else if(bullet1.y < 0)
-        { // If bullet1 goes past the top edge of the screen (y < 0)
-            canShoot = true; // Allow shooting again
-        }
-        else if(bullet1.y > 720)
-        { // If bullet1 goes past the bottom edge of the screen (y > 720)
-            canShoot = true;  // Allow shooting again
-        }
+        if(bullet1.x > 1280) { canShoot = true; }
+        else if(bullet1.x < 0) { canShoot = true; }
+        else if(bullet1.y < 0) { canShoot = true; }
+        else if(bullet1.y > 720) { canShoot = true; }
     }
 
-for (let j = 0; j < bullets.length; j++) {
-    for (let i = 0; i < zombies.length; i++) {
-        let isHitX = bullets[j].x > zombies[i].x + 27 * imagesScale && bullets[j].x < zombies[i].x + (27 + 206) * imagesScale;
-        let isHitY = bullets[j].y > zombies[i].y + 77 * imagesScale && bullets[j].y < zombies[i].y + (77 + 197) * imagesScale;
+    for (let j = 0; j < bullets.length; j++) {
+        for (let i = 0; i < enemies.length; i++) {
+            let isHitX = bullets[j].x > enemies[i].x + 27 * imagesScale && bullets[j].x < enemies[i].x + (27 + 206) * imagesScale;
+            let isHitY = bullets[j].y > enemies[i].y + 77 * imagesScale && bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
 
-        if (isHitX && isHitY) {
-            shootSound.pause();
-            shootSound.currentTime = 0;
-            shootSound.volume = 0.5;
-            shootSound.play();
+            if (isHitX && isHitY) {
+                shootSound.pause();
+                shootSound.currentTime = 0;
+                shootSound.volume = 0.5;
+                shootSound.play();
 
-            alienDeathSound.volume = 0.9;
-            if (alienDeathSound.paused) {
-                alienDeathSound.play();
+                alienDeathSound.volume = 0.9;
+                if (alienDeathSound.paused) {
+                    alienDeathSound.play();
+                }
+
+                let randomSpeak = Math.random();
+                let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
+                soundToPlay.volume = 0.9;
+                soundToPlay.play();
+
+                enemies.splice(i, 1);
+                enemiesWaitTime.splice(i, 1);
+                enemiesAnimationPosition.splice(i, 1);
+                enemiesPlayerCollision.splice(i, 1);
+
+                score += 1;
+
+                bullets[j].x = 9999;
+                bullets[j].y = 9999;
             }
-
-            let randomSpeak = Math.random();
-            let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
-            soundToPlay.volume = 0.9;
-            soundToPlay.play();
-
-            zombies.splice(i, 1);
-            zombiesWaitTime.splice(i, 1);
-            zombiesAnimationPosition.splice(i, 1);
-            zombiesPlayerCollision.splice(i, 1);
-
-            score += 1;
-
-            bullets[j].x = 9999;
-            bullets[j].y = 9999;
         }
     }
-}
 
-for (let i = 0; i < zombies.length; i++) {
-    let playerXStart = 640 - 37 - player.width * imagesScale;
-    let playerXEnd = 640 + (256 - 37) * imagesScale - player.width * imagesScale;
-    let playerYStart = 360 - 38 * imagesScale - player.height * imagesScale - 80;
-    let playerYEnd = 360 + (150 - 38) * imagesScale - player.height * imagesScale + 50;
+    for (let i = 0; i < enemies.length; i++) {
+        let playerXStart = 640 - 37 - player.width * imagesScale;
+        let playerXEnd = 640 + (256 - 37) * imagesScale - player.width * imagesScale;
+        let playerYStart = 360 - 38 * imagesScale - player.height * imagesScale - 80;
+        let playerYEnd = 360 + (150 - 38) * imagesScale - player.height * imagesScale + 50;
 
-    let inRangeX = zombies[i].x + 27 * imagesScale > playerXStart && zombies[i].x + 27 * imagesScale < playerXEnd;
-    let inRangeY = zombies[i].y + 79 * imagesScale > playerYStart && zombies[i].y + 79 * imagesScale < playerYEnd;
+        let inRangeX = enemies[i].x + 27 * imagesScale > playerXStart && enemies[i].x + 27 * imagesScale < playerXEnd;
+        let inRangeY = enemies[i].y + 79 * imagesScale > playerYStart && enemies[i].y + 79 * imagesScale < playerYEnd;
 
-    if (inRangeX && inRangeY) {
-        zombiesPlayerCollision[i] = false;
-        zombieAttackAnimationFunction(i);
-    } else {
-        if (zombiesPlayerCollision[i] === false) {
-            zombiesAnimationPosition[i] = 0;
+        if (inRangeX && inRangeY) {
+            enemiesPlayerCollision[i] = false;
+            enemyAttackAnimationFunction(i);
+        } else {
+            if (enemiesPlayerCollision[i] === false) {
+                enemiesAnimationPosition[i] = 0;
+            }
+            enemiesPlayerCollision[i] = true;
         }
-        zombiesPlayerCollision[i] = true;
+    }
+
+    for (let i = 0; i < enemies.length; i++) {
+        if (enemiesPlayerCollision[i]) {
+            let dx = enemies[i].x - player.x;
+            let dy = enemies[i].y - player.y;
+            let angleToPlayer = Math.atan2(dy, dx);
+            
+            enemies[i].angle = angleToPlayer + Math.PI;
+            
+            enemies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
+            enemies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
+            
+            enemyMovementAnimationFunction(i);
+        }
+    }
+
+    grassArray.forEach(grass => grass.update());
+    player.update();
+    bullets.forEach(bullet => bullet.update());
+    crosshair.update();
+
+    for(let i = 0; i < enemies.length; i++) {
+        enemies[i].update(); 
+    }
+
+    if(gameOver) {
+        restartScreen.update(); 
+        ctx.fillText("High Score: " + highscore.toString(), 640, 650); 
     }
 }
 
-for (let i = 0; i < zombies.length; i++) {
-    if (zombiesPlayerCollision[i]) {
-        let dx = zombies[i].x - player.x;
-        let dy = zombies[i].y - player.y;
-        let angleToPlayer = Math.atan2(dy, dx);
-        
-        zombies[i].angle = angleToPlayer + Math.PI;
-        
-        zombies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
-        zombies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
-        
-        zombieMovementAnimationFunction(i);
-    }
-}
+// ==========================================
+// 6. GAME OVER LOGIC
+// ==========================================
 
-grassArray.forEach(grass => grass.update());
-player.update();
-bullets.forEach(bullet => bullet.update());
-crosshair.update();
-
-    // Update all zombies
-for(let i = 0; i < zombies.length; i++) {
-    zombies[i].update(); // Update each zombie's state (position, animation, etc.)
-}
-
-// Check if the game is over
-if(gameOver) {
-    restartScreen.update(); // Update the restart screen (e.g., show a "Game Over" image)
-    ctx.fillText("High Score: " + highscore.toString(), 640, 650); // Display the high score on the screen
-}
-}
-
-// Function to end the game
 function endGame() {
-    gameOver = true; // Set the game state to "game over"
+    gameOver = true; 
     
-    // Check if the current score is higher than the high score
     if(highscore < score) {
-        highscore = score; // Update the high score if the current score is higher
+        highscore = score; 
     }
 }
+
+// ==========================================
+// 7. INPUT HANDLING
+// ==========================================
 
 function handleMovementPress(event) {
     const key = event.keyCode;
@@ -452,6 +448,10 @@ function handleMovementRelease(event) {
         moveBackwards = false;
     }
 }
+
+// ==========================================
+// 8. BACKGROUND MOVEMENT (CAMERA)
+// ==========================================
 
 function moveLeft() {
     grassArray[2].x -= 3840;
@@ -501,38 +501,42 @@ function Shoot(event) {
     }
 }
 
-function spawnZombie() {
-    let newZombie = new Component(
+// ==========================================
+// 9. ENEMY LOGIC & SPAWNING
+// ==========================================
+
+function spawnEnemy() {
+    let newEnemy = new Component(
         288 * imagesScale, 
         311 * imagesScale, 
-        zombieSprite, 
+        enemySprite, 
         640 - (288 * imagesScale) / 2, 
         360 - (311 * imagesScale) / 2, 
         "image"
     );
 
     let randomPosition = Math.floor(Math.random() * 4) + 1;
-    let zW = 288 * imagesScale;
-    let zH = 311 * imagesScale;
+    let eW = 288 * imagesScale;
+    let eH = 311 * imagesScale;
 
     if (randomPosition === 1) {
-        newZombie.x = -zW / 2;
-        newZombie.y = Math.random() * 720 - zH / 2;
+        newEnemy.x = -eW / 2;
+        newEnemy.y = Math.random() * 720 - eH / 2;
     } else if (randomPosition === 2) {
-        newZombie.x = 1280 - zW / 2;
-        newZombie.y = Math.random() * 720 - zH / 2;
+        newEnemy.x = 1280 - eW / 2;
+        newEnemy.y = Math.random() * 720 - eH / 2;
     } else if (randomPosition === 3) {
-        newZombie.x = Math.random() * 1280 - zW / 2;
-        newZombie.y = 720 - zH / 2;
+        newEnemy.x = Math.random() * 1280 - eW / 2;
+        newEnemy.y = 720 - eH / 2;
     } else if (randomPosition === 4) {
-        newZombie.x = Math.random() * 1280 - zW / 2;
-        newZombie.y = -zH / 2;
+        newEnemy.x = Math.random() * 1280 - eW / 2;
+        newEnemy.y = -eH / 2;
     }
 
-    zombies.push(newZombie);
-    zombiesWaitTime.push(5);
-    zombiesAnimationPosition.push(0);
-    zombiesPlayerCollision.push(true);
+    enemies.push(newEnemy);
+    enemiesWaitTime.push(5);
+    enemiesAnimationPosition.push(0);
+    enemiesPlayerCollision.push(true);
 }
 
 let difficulty = 0.25;
@@ -544,6 +548,10 @@ function getRandomInterval() {
     minTime -= minTime * difficulty;
     return Math.floor(Math.random() * (maxTime - minTime + 1) + minTime);
 }
+
+// ==========================================
+// 10. ANIMATION CONTROLLERS
+// ==========================================
 
 let i = 0;
 let r = 0;
@@ -584,26 +592,26 @@ function playerIdleAnimationFunction() {
     }
 }
 
-function zombieMovementAnimationFunction(zombieNum) {
-    if (zombiesWaitTime[zombieNum] === 0) {
-        zombies[zombieNum].image.src = zombieMovementAnimation[zombiesAnimationPosition[zombieNum] % zombieMovementAnimation.length].src;
-        zombiesAnimationPosition[zombieNum] = (zombiesAnimationPosition[zombieNum] + 1) % zombieMovementAnimation.length;
-        zombiesWaitTime[zombieNum] = 5;
+function enemyMovementAnimationFunction(enemyNum) {
+    if (enemiesWaitTime[enemyNum] === 0) {
+        enemies[enemyNum].image.src = enemyMovementAnimation[enemiesAnimationPosition[enemyNum] % enemyMovementAnimation.length].src;
+        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyMovementAnimation.length;
+        enemiesWaitTime[enemyNum] = 5;
     } else {
-        zombiesWaitTime[zombieNum]--;
+        enemiesWaitTime[enemyNum]--;
     }
 }
 
-function zombieAttackAnimationFunction(zombieNum) {
-    if (zombiesWaitTime[zombieNum] === 0) {
-        zombies[zombieNum].image.src = zombieAttackAnimation[zombiesAnimationPosition[zombieNum] % zombieAttackAnimation.length].src;
-        zombiesAnimationPosition[zombieNum] = (zombiesAnimationPosition[zombieNum] + 1) % zombieAttackAnimation.length;
-        zombiesWaitTime[zombieNum] = 5;
+function enemyAttackAnimationFunction(enemyNum) {
+    if (enemiesWaitTime[enemyNum] === 0) {
+        enemies[enemyNum].image.src = enemyAttackAnimation[enemiesAnimationPosition[enemyNum] % enemyAttackAnimation.length].src;
+        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyAttackAnimation.length;
+        enemiesWaitTime[enemyNum] = 5;
 
-        if (zombies[zombieNum].image.src === zombieAttackAnimation[6].src && zombiesPlayerCollision[zombieNum] === false) {
+        if (enemies[enemyNum].image.src === enemyAttackAnimation[6].src && enemiesPlayerCollision[enemyNum] === false) {
             endGame();
         }
     } else {
-        zombiesWaitTime[zombieNum]--;
+        enemiesWaitTime[enemyNum]--;
     }
 }
