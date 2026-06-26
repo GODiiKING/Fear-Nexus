@@ -18,6 +18,18 @@ function startGame() {
         0
     );
 
+    // Inside startGame() in script.js
+    window.addEventListener("keydown", function(e) {
+    if (e.key === '1' || e.key === '2') {
+        console.log("Key captured in main loop:", e.key);
+        if (window.abilitySystem) {
+            window.abilitySystem.handleKey(e.key);
+        } else {
+            console.error("Ability System not found!");
+        }
+    }
+});
+
     // Bulletproof: Force initialize stats if they aren't set yet
     player.hp = 100;
     player.magic = 100;
@@ -193,6 +205,13 @@ function updateGameArea() {
     ctx.fillText(score.toString(), 640, 60);
 
     updateUI(); 
+
+    // SAFE VERSION: Checks if abilitySystem exists before trying to access it
+    if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText(abilitySystem.debugText, 50, 50);
+    }
 
     onmousemove = function (e) {
         let rect = GameArea.canvas.getBoundingClientRect();
