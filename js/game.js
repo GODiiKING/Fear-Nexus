@@ -40,25 +40,37 @@ function moveDown() {
 // UI RENDER LOOP
 // ==========================================
 function updateUI() {
-    // 1. Update Health Bar
-    let healthPercentage = (playerHealth / maxHealth) * 100;
-    document.getElementById('health-fill').style.width = healthPercentage + '%';
-    document.getElementById('health-text').innerText = playerHealth + '/' + maxHealth;
+    // 1. Update Health Bar (FIXED: Now reads player.hp and assumes 100 max)
+    let maxHealth = 100;
+    let currentHp = (player && player.hp !== undefined) ? player.hp : 100;
+    let healthPercentage = (currentHp / maxHealth) * 100;
+    
+    let healthFill = document.getElementById('health-fill');
+    let healthText = document.getElementById('health-text');
+    
+    if (healthFill) healthFill.style.width = healthPercentage + '%';
+    if (healthText) healthText.innerText = currentHp + '/' + maxHealth;
 
-    // 2. Update Magic Bar
-    let magicPercentage = (playerMagic / maxMagic) * 100;
-    document.getElementById('magic-fill').style.width = magicPercentage + '%';
-    document.getElementById('magic-text').innerText = playerMagic + '/' + maxMagic;
+    // 2. Update Magic Bar (FIXED: Now reads player.magic and assumes 100 max)
+    let maxMagic = 100;
+    let currentMagic = (player && player.magic !== undefined) ? player.magic : 100;
+    let magicPercentage = (currentMagic / maxMagic) * 100;
+    
+    let magicFill = document.getElementById('magic-fill');
+    let magicText = document.getElementById('magic-text');
+    
+    if (magicFill) magicFill.style.width = magicPercentage + '%';
+    if (magicText) magicText.innerText = currentMagic + '/' + maxMagic;
 
     // 3. Update Ability Glows
     for (let i = 1; i <= 6; i++) {
         let abId = 'ab' + i;
         let icon = document.getElementById(abId);
         
-        if (abilitiesReady[abId]) {
+        if (icon && typeof abilitiesReady !== 'undefined' && abilitiesReady[abId]) {
             icon.classList.remove('cooldown');
             icon.classList.add('ready');
-        } else {
+        } else if (icon) {
             icon.classList.remove('ready');
             icon.classList.add('cooldown');
         }

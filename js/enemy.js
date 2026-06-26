@@ -61,6 +61,17 @@ function spawnEnemy() {
         newEnemy.y = -eH / 2;
     }
 
+    // -------------------------------------------------------------
+    // DYNAMIC HEALTH SCALING
+    // -------------------------------------------------------------
+    let currentKills = typeof score !== 'undefined' ? score : 0; 
+    let extraHp = Math.floor(currentKills / 10);
+    
+    newEnemy.maxHp = 2 + extraHp; 
+    newEnemy.hp = newEnemy.maxHp;   
+    newEnemy.lastHitTime = 0; 
+    // -------------------------------------------------------------
+
     enemies.push(newEnemy);
     enemiesWaitTime.push(5);
     enemiesAnimationPosition.push(0);
@@ -86,16 +97,36 @@ function enemyMovementAnimationFunction(enemyNum) {
     }
 }
 
-function enemyAttackAnimationFunction(enemyNum) {
-    if (enemiesWaitTime[enemyNum] === 0) {
-        enemies[enemyNum].image.src = enemyAttackAnimation[enemiesAnimationPosition[enemyNum] % enemyAttackAnimation.length].src;
-        enemiesAnimationPosition[enemyNum] = (enemiesAnimationPosition[enemyNum] + 1) % enemyAttackAnimation.length;
-        enemiesWaitTime[enemyNum] = 5;
+// ==========================================
+// ENEMY HEALTH BAR RENDERER
+// ==========================================
+// FIXED: Added 'ctx' parameter to cleanly receive the rendering tool from your main loop
+function drawEnemyHealthBars(ctx) {
+    const currentTime = Date.now();
 
-        if (enemies[enemyNum].image.src === enemyAttackAnimation[6].src && enemiesPlayerCollision[enemyNum] === false) {
-            endGame();
+    for (let i = 0; i < enemies.length; i++) {
+        let enemy = enemies[i];
+
+        // Only draw the health bar if they've been hit within the last 3000ms (3 seconds)
+        if (enemy.lastHitTime && (currentTime - enemy.lastHitTime < 3000)) {
+            const barWidth = 60;  // Width of the bar adjusted for the skeleton scale
+            const barHeight = 6;  // Height of the health bar
+            
+            // Calculate health percentage container
+            const healthPercentage = enemy.hp / enemy.maxHp;
+            const currentBarWidth = barWidth * healthPercentage;
+            
+            // Center the bar horizontally right above the enemy's head
+            const barX = enemy.x + (enemy.width / 2) - (barWidth / 2);
+            const barY = enemy.y - 15; 
+            
+            // 1. Draw dark background backing container
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // 2. Draw active red progress indicator
+            ctx.fillStyle = '#ff0000'; 
+            ctx.fillRect(barX, barY, currentBarWidth, barHeight);
         }
-    } else {
-        enemiesWaitTime[enemyNum]--;
     }
 }

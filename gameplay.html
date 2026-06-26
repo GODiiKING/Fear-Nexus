@@ -10,39 +10,46 @@
 <body onload="startGame()">
     <h1 class="Game-Title" style="font-family: 'Acme', sans-serif;"></h1>
 
-<div id="game-container">
-    <div id="ui-layer">
-        <div class="ui-group health-group">
-            <div class="abilities">
-                <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
-                <img src="images/ui/square.png" class="ability-icon ready" id="ab2">
-                <img src="images/ui/square.png" class="ability-icon ready" id="ab3">
-            </div>
-            <div class="bar-wrapper">
-                <div class="icon">❤️</div>
-                <div class="tube" id="health-tube">
-                    <div class="fill health-fill" id="health-fill"></div>
-                    <span class="bar-text" id="health-text">100/100</span>
+    <div id="game-container">
+        <div id="ui-layer">
+            <div class="ui-group health-group">
+                <div class="abilities">
+                    <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
+                    <img src="images/ui/square.png" class="ability-icon ready" id="ab2">
+                    <img src="images/ui/square.png" class="ability-icon ready" id="ab3">
+                </div>
+                <div class="bar-wrapper">
+                    <div class="icon">❤️</div>
+                    <div class="tube" id="health-tube">
+                        <div class="fill health-fill" id="health-fill"></div>
+                        <span class="bar-text" id="health-text">100/100</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="ui-group magic-group">
-            <div class="abilities">
-                <img src="images/ui/triangle.png" class="ability-icon ready" id="ab4">
-                <img src="images/ui/triangle.png" class="ability-icon ready" id="ab5">
-                <img src="images/ui/triangle.png" class="ability-icon ready" id="ab6">
-            </div>
-            <div class="bar-wrapper">
-                <div class="icon">💧</div>
-                <div class="tube">
-                    <div class="fill magic-fill" id="magic-fill"></div>
-                    <span class="bar-text" id="magic-text">100/100</span>
+            <div class="ui-group magic-group">
+                <div class="abilities">
+                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab4">
+                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab5">
+                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab6">
+                </div>
+                <div class="bar-wrapper">
+                    <div class="icon">💧</div>
+                    <div class="tube">
+                        <div class="fill magic-fill" id="magic-fill"></div>
+                        <span class="bar-text" id="magic-text">100/100</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/character.js"></script>
+    <script src="js/collisions.js"></script>
 
     <audio id="backgroundMusic"></audio>
     <script>
@@ -54,14 +61,40 @@
         ];
         const audio = document.getElementById("backgroundMusic");
         let hasStarted = false;
+        let isTransitioning = false; // Prevents overlapping play/pause commands
 
         function playRandomTrack() {
-            const randomIndex = Math.floor(Math.random() * audioTracks.length);
-            audio.src = audioTracks[randomIndex];
-            audio.play().catch(error => console.error("Audio playback failed:", error));
+            if (isTransitioning) return; 
+            isTransitioning = true;
+
+            try {
+                audio.pause();
+                
+                const randomIndex = Math.floor(Math.random() * audioTracks.length);
+                audio.src = audioTracks[randomIndex];
+                audio.load(); 
+
+                let playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            isTransitioning = false; // Unlock once playing successfully
+                        })
+                        .catch(error => {
+                            console.log("Audio thread reset handled safely.");
+                            isTransitioning = false; // Clear lock on error
+                        });
+                } else {
+                    isTransitioning = false;
+                }
+            } catch (e) {
+                isTransitioning = false;
+            }
         }
 
+        // Listeners for seamless track shifting
         audio.addEventListener("ended", playRandomTrack);
+        
         document.addEventListener("click", () => {
             if (!hasStarted) {
                 hasStarted = true;
@@ -69,12 +102,5 @@
             }
         });
     </script>
-
-    <script src="js/config.js"></script>
-    <script src="js/entities.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/character.js"></script>
-    <script src="js/collisions.js"></script>
 </body>
 </html>

@@ -80,15 +80,27 @@ function checkBulletCollisions() {
                 soundToPlay.volume = 0.9;
                 soundToPlay.play();
 
-                enemies.splice(i, 1);
-                enemiesWaitTime.splice(i, 1);
-                enemiesAnimationPosition.splice(i, 1);
-                enemiesPlayerCollision.splice(i, 1);
+                // -------------------------------------------------------------
+                // ENEMY DAMAGE & TIMING SYSTEM
+                // -------------------------------------------------------------
+                enemies[i].hp -= 1;               
+                enemies[i].lastHitTime = Date.now(); 
 
-                score += 1;
+                if (enemies[i].hp <= 0) {
+                    enemies.splice(i, 1);
+                    enemiesWaitTime.splice(i, 1);
+                    enemiesAnimationPosition.splice(i, 1);
+                    enemiesPlayerCollision.splice(i, 1);
+
+                    score += 1;
+                    i--; 
+                }
+                // -------------------------------------------------------------
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
+                
+                break; 
             }
         }
     }
@@ -101,6 +113,11 @@ function checkBulletCollisions() {
 // ==========================================
 
 function checkEnemyPlayerCollisions() {
+    const currentTime = Date.now();
+
+    if (!window.globalPlayerInvincibleTime) {
+        window.globalPlayerInvincibleTime = 0;
+    }
 
     for (let i = 0; i < enemies.length; i++) {
 
@@ -119,20 +136,33 @@ function checkEnemyPlayerCollisions() {
             enemies[i].y + 79 * imagesScale < playerYEnd;
 
         if (inRangeX && inRangeY) {
+            
+            console.log(`[CONTACT] Enemy ${i} touched player. HP: ${player.hp}. Cooldown remaining: ${Math.max(0, 2000 - (currentTime - window.globalPlayerInvincibleTime))}ms`);
+
+            if (currentTime - window.globalPlayerInvincibleTime > 2000) {
+                if (typeof player.hp !== 'undefined') {
+                    player.hp -= 10; 
+                    if (player.hp < 0) player.hp = 0;
+                    
+                    window.globalPlayerInvincibleTime = currentTime; 
+                    console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
+                }
+            }
 
             enemiesPlayerCollision[i] = false;
-            enemyAttackAnimationFunction(i);
+            
+            // SAFETY FIX: Prevents the script from crashing if the function isn't found
+            if (typeof enemyAttackAnimationFunction === 'function') {
+                enemyAttackAnimationFunction(i);
+            }
 
         } else {
-
             if (enemiesPlayerCollision[i] === false) {
                 enemiesAnimationPosition[i] = 0;
             }
-
             enemiesPlayerCollision[i] = true;
         }
     }
-
 }
 
 
@@ -156,7 +186,10 @@ function moveEnemies() {
             enemies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
             enemies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
 
-            enemyMovementAnimationFunction(i);
+            // SAFETY FIX: Prevents the script from crashing if the function isn't found
+            if (typeof enemyMovementAnimationFunction === 'function') {
+                enemyMovementAnimationFunction(i);
+            }
         }
 
     }
