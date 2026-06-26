@@ -40,12 +40,12 @@ function updateBullets() {
 // ==========================================
 // BULLET HIT DETECTION
 // ==========================================
-
 function checkBulletCollisions() {
-
     for (let j = 0; j < bullets.length; j++) {
-
         for (let i = 0; i < enemies.length; i++) {
+            
+            // Safety Check: Ensure enemy exists
+            if (!enemies[i]) continue;
 
             let isHitX =
                 bullets[j].x > enemies[i].x + 27 * imagesScale &&
@@ -56,55 +56,43 @@ function checkBulletCollisions() {
                 bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
 
             if (isHitX && isHitY) {
-
-                shootSound.pause();
-                shootSound.currentTime = 0;
-                shootSound.volume = 0.5;
-                shootSound.play();
+                // Audio Handling
+                try {
+                    shootSound.pause();
+                    shootSound.currentTime = 0;
+                    shootSound.play();
+                } catch (error) {}
 
                 alienDeathSound.volume = 0.9;
-
-                if (alienDeathSound.paused) {
-                    alienDeathSound.play();
-                }
+                if (alienDeathSound.paused) alienDeathSound.play();
 
                 let randomSpeak = Math.random();
-
-                let soundToPlay =
-                    randomSpeak < 0.33
-                        ? alienSpeakSound
-                        : (randomSpeak < 0.66
-                            ? alienSpeakSound2
-                            : alienSpeakSound3);
-
+                let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
                 soundToPlay.volume = 0.9;
                 soundToPlay.play();
 
-                // -------------------------------------------------------------
-                // ENEMY DAMAGE & TIMING SYSTEM
-                // -------------------------------------------------------------
-                enemies[i].hp -= 1;               
-                enemies[i].lastHitTime = Date.now(); 
+                // Apply Damage
+                enemies[i].hp -= 1;
+                enemies[i].lastHitTime = Date.now();
 
+                // Handle Death or Bullet Removal
                 if (enemies[i].hp <= 0) {
+                    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
+                    score += isBoss ? 10 : 1;
+
                     enemies.splice(i, 1);
                     enemiesWaitTime.splice(i, 1);
                     enemiesAnimationPosition.splice(i, 1);
                     enemiesPlayerCollision.splice(i, 1);
-
-                    score += 1;
-                    i--; 
+                    i--;
                 }
-                // -------------------------------------------------------------
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
-                
-                break; 
+                break; // Exit enemy loop since bullet is gone
             }
         }
     }
-
 }
 
 
