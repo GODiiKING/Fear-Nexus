@@ -53,3 +53,18 @@ let currentMinY = -720;
 
 let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
 let imagesScale = 0.6;
+
+// ==========================================
+// UI, HEALTH & MAGIC STATS
+// ==========================================
+let maxHealth = 100;
+let playerHealth = 100;
+
+let maxMagic = 100;
+let playerMagic = 100;
+
+// Ability states (true = ready/purple, false = cooldown/yellow)
+let abilitiesReady = {
+    ab1: true, ab2: true, ab3: true,
+    ab4: true, ab5: true, ab6: true
+};

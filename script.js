@@ -7,7 +7,7 @@
 function startGame() {
 
     GameArea.start();
-
+    showUI();
     player = new Component(
         313 * imagesScale,
         207 * imagesScale,
@@ -90,29 +90,18 @@ let GameArea = {
     canvas: document.createElement("canvas"),
 
     start: function () {
-
         this.canvas.width = 1280;
         this.canvas.height = 720;
-
         this.context = this.canvas.getContext("2d");
-
         clearInterval(GameArea.interval);
-
         this.interval = setInterval(updateGameArea, 20);
-
         this.canvas.id = "Game-Window";
 
-        document.body.insertBefore(
-            this.canvas,
-            document.body.childNodes[0]
-        );
-
-        let h1Element = document.querySelector("h1.Game-Title");
-
-        h1Element.insertAdjacentElement(
-            "afterend",
-            this.canvas
-        );
+        // Find the container we just made
+        let container = document.getElementById("game-container");
+        
+        // Add the canvas to the container as the first element
+        container.insertBefore(this.canvas, container.firstChild);
     },
 
     clear: function () {
@@ -140,6 +129,9 @@ function updateGameArea() {
     let ctx = GameArea.context;
 
     ctx.fillText(score.toString(), 640, 60);
+
+    // This is the call that updates your health, magic, and ability glows!
+    updateUI(); 
 
     onmousemove = function (e) {
 
@@ -203,5 +195,15 @@ function endGame() {
     if (highscore < score) {
         highscore = score;
     }
+    hideUI();
+}
 
+function hideUI() {
+    document.querySelector('.health-group').classList.add('hidden');
+    document.querySelector('.magic-group').classList.add('hidden');
+}
+
+function showUI() {
+    document.querySelector('.health-group').classList.remove('hidden');
+    document.querySelector('.magic-group').classList.remove('hidden');
 }

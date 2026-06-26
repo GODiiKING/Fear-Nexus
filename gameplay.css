@@ -16,7 +16,7 @@ canvas {
     margin-right: auto;
     display: block;
     background-color: rgba(255, 255, 255, 0.8);
-    margin-top: 25px;
+
 }
 
 @media (max-width: 768px) {
@@ -27,4 +27,199 @@ canvas {
     .Game-Title {
         font-size: 50px;
     }
+}
+
+/* ==========================================
+   UI OVERLAY & BARS
+   ========================================== */
+.interface {
+    position: absolute;
+    top: 110px; /* Adjust slightly based on your H1 height */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1280px; 
+    height: 720px; 
+    pointer-events: none; /* Let clicks pass through to the game */
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.ui-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.health-group { align-items: flex-start; }
+.magic-group { align-items: flex-end; }
+
+.abilities {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+.ability-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* THE SECRET SAUCE: GLOW ANIMATIONS */
+.ability-icon.ready {
+    box-shadow: 0 0 15px 3px #b056ff; /* Purple glow when active */
+    filter: drop-shadow(0 0 5px #b056ff);
+}
+
+.ability-icon.cooldown {
+    box-shadow: 0 0 15px 2px #ffc048; /* Yellow/Gold warning glow */
+    filter: grayscale(80%) drop-shadow(0 0 5px #ffc048);
+    opacity: 0.6;
+}
+
+.bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.magic-group .bar-wrapper { flex-direction: row-reverse; } /* Mirrors the layout */
+
+.icon {
+    font-size: 40px;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.4));
+}
+
+/* THE TUBES */
+.tube {
+    width: 300px;
+    height: 35px;
+    background: linear-gradient(to bottom, #111, #000);
+    border: 3px solid #333;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 0 10px #000, 0 0 10px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 100%; /* Will dynamically shrink via JS */
+    transition: width 0.2s ease-out;
+}
+
+.health-fill {
+    background: linear-gradient(to bottom, #ff3366, #990000);
+    box-shadow: 0 0 10px #ff3366;
+}
+
+.magic-fill {
+    background: linear-gradient(to bottom, #33ccff, #004080);
+    box-shadow: 0 0 10px #33ccff;
+}
+
+.bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: "Acme", sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 3px black, -1px -1px 3px black;
+}
+
+/* DAMAGE FLASH (For later use) */
+.tube.taking-damage {
+    box-shadow: 0 0 25px 5px #ff0000;
+}
+
+#game-container {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    margin: 0 auto; /* Centers the game */
+    margin: 23px auto 0 auto;
+}
+
+#Game-Window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Game is at the bottom */
+}
+
+/* 1. Ensure UI layer covers the exact game area */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through to game */
+    z-index: 10;
+}
+
+/* 2. Position the Health System (Bottom-Left) */
+.health-group {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto; /* Allows interaction */
+}
+
+/* 3. Position the Magic System (Bottom-Right) */
+.magic-group {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Keeps icons right-aligned */
+    gap: 10px;
+    pointer-events: auto;
+}
+
+/* 4. Keep existing Bar/Tube styles */
+.bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.magic-group .bar-wrapper { flex-direction: row-reverse; }
+
+.tube {
+    width: 300px;
+    height: 35px;
+    background: linear-gradient(to bottom, #111, #000);
+    border: 3px solid #333;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 0 10px #000, 0 0 10px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+/* Ensure icons are visible */
+.ability-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.hidden {
+    display: none !important;
 }

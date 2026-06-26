@@ -35,3 +35,33 @@ function moveDown() {
 
     grassArray = [grassArray[3], grassArray[4], grassArray[5], grassArray[6], grassArray[7], grassArray[8], grassArray[0], grassArray[1], grassArray[2]];
 }
+
+// ==========================================
+// UI RENDER LOOP
+// ==========================================
+function updateUI() {
+    // 1. Update Health Bar
+    let healthPercentage = (playerHealth / maxHealth) * 100;
+    document.getElementById('health-fill').style.width = healthPercentage + '%';
+    document.getElementById('health-text').innerText = playerHealth + '/' + maxHealth;
+
+    // 2. Update Magic Bar
+    let magicPercentage = (playerMagic / maxMagic) * 100;
+    document.getElementById('magic-fill').style.width = magicPercentage + '%';
+    document.getElementById('magic-text').innerText = playerMagic + '/' + maxMagic;
+
+    // 3. Update Ability Glows
+    for (let i = 1; i <= 6; i++) {
+        let abId = 'ab' + i;
+        let icon = document.getElementById(abId);
+        
+        if (abilitiesReady[abId]) {
+            icon.classList.remove('cooldown');
+            icon.classList.add('ready');
+        } else {
+            icon.classList.remove('ready');
+            icon.classList.add('cooldown');
+        }
+    }
+}
+
