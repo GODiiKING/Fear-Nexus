@@ -37,40 +37,40 @@ function startGame() {
     // ==========================================
     // THE HP SPY TRACKER
     // ==========================================
-    let actualHp = 100; 
-    Object.defineProperty(player, 'hp', {
-        get: function() { 
-            return actualHp; 
-        },
-        set: function(newValue) {
-            if (newValue < actualHp) {
-                console.warn(`[HP LEAK DETECTED] HP is being changed from ${actualHp} to ${newValue}!`);
-                console.trace("Busted! Look below to see the line that caused this:");
-            }
-            actualHp = newValue;
-        }
-    });
+    // let actualHp = 100; 
+    // Object.defineProperty(player, 'hp', {
+    //     get: function() { 
+    //         return actualHp; 
+    //     },
+    //     set: function(newValue) {
+    //         if (newValue < actualHp) {
+    //             console.warn(`[HP LEAK DETECTED] HP is being changed from ${actualHp} to ${newValue}!`);
+    //             console.trace("Busted! Look below to see the line that caused this:");
+    //         }
+    //         actualHp = newValue;
+    //     }
+    // });
 
     // ==========================================
     // THE MAGIC SPY TRACKER
     // ==========================================
-    let actualMagic = 100; 
-    Object.defineProperty(player, 'magic', {
-        get: function() { 
-            return actualMagic; 
-        },
-        set: function(newValue) {
-            if (newValue < actualMagic) {
-                console.log(`[MAGIC TRACKER] Magic decreased from ${actualMagic} to ${newValue}`);
-            }
-            actualMagic = newValue;
+    // let actualMagic = 100; 
+    // Object.defineProperty(player, 'magic', {
+    //     get: function() { 
+    //         return actualMagic; 
+    //     },
+    //     set: function(newValue) {
+    //         if (newValue < actualMagic) {
+    //             console.log(`[MAGIC TRACKER] Magic decreased from ${actualMagic} to ${newValue}`);
+    //         }
+    //         actualMagic = newValue;
             
-            // NOTE: If your updateUI() function isn't updating your visual bar element, 
-            // you can safely uncomment the lines below to force-update its CSS width:
-            // let magicBar = document.querySelector('.magic-bar');
-            // if (magicBar) magicBar.style.width = actualMagic + '%';
-        }
-    });
+    //         // NOTE: If your updateUI() function isn't updating your visual bar element, 
+    //         // you can safely uncomment the lines below to force-update its CSS width:
+    //         // let magicBar = document.querySelector('.magic-bar');
+    //         // if (magicBar) magicBar.style.width = actualMagic + '%';
+    //     }
+    // });
     // ==========================================
 
     grass1 = new Component(1280, 720, "images/background/bg3.png", -1280, 720, "grass");
@@ -197,6 +197,11 @@ let GameArea = {
 // ==========================================
 
 function updateGameArea() {
+    // Check if the store is open by checking if the panel is visible
+    const panel = document.getElementById("levelup-panel");
+    if (panel && !panel.classList.contains("hidden")) {
+        return; // Exit the function immediately, freezing the game
+    }
 
     GameArea.clear();
 

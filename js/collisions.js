@@ -36,15 +36,60 @@ function updateBullets() {
     }
 }
 
+// ==========================================
+// UI RENDER LOOP (INTEGRATION UPDATE)
+// ==========================================
+function updateUI() {
+    // 1. Update Health Bar using global PlayerStats limits
+    let maxHealth = window.PlayerStats ? window.PlayerStats.maxHealth : 100;
+    let currentHp = (player && player.hp !== undefined) ? player.hp : maxHealth;
+    let healthPercentage = (currentHp / maxHealth) * 100;
+    
+    let healthFill = document.getElementById('health-fill');
+    let healthText = document.getElementById('health-text');
+    
+    if (healthFill) healthFill.style.width = healthPercentage + '%';
+    if (healthText) healthText.innerText = currentHp + '/' + maxHealth;
+
+    // 2. Update Magic Bar using global PlayerStats limits
+    let maxMagic = window.PlayerStats ? window.PlayerStats.maxMagic : 100;
+    let currentMagic = (player && player.magic !== undefined) ? player.magic : maxMagic;
+    let magicPercentage = (currentMagic / maxMagic) * 100;
+    
+    let magicFill = document.getElementById('magic-fill');
+    let magicText = document.getElementById('magic-text');
+    
+    if (magicFill) magicFill.style.width = magicPercentage + '%';
+    if (magicText) magicText.innerText = currentMagic + '/' + maxMagic;
+
+    // 3. Optional visual updates for Level and Souls if elements exist
+    let levelText = document.getElementById('level-text');
+    if (levelText && window.PlayerStats) {
+        levelText.innerText = "Level " + window.PlayerStats.level;
+    }
+
+    // 4. Update Ability Glows
+    for (let i = 1; i <= 6; i++) {
+        let abId = 'ab' + i;
+        let icon = document.getElementById(abId);
+        
+        if (icon && typeof abilitiesReady !== 'undefined' && abilitiesReady[abId]) {
+            icon.classList.remove('cooldown');
+            icon.classList.add('ready');
+        } else if (icon) {
+            icon.classList.remove('ready');
+            icon.classList.add('cooldown');
+        }
+    }
+}
 
 // ==========================================
-// BULLET HIT DETECTION
+// BULLET HIT DETECTION (STABILITY PATCH)
 // ==========================================
 function checkBulletCollisions() {
     for (let j = 0; j < bullets.length; j++) {
         for (let i = 0; i < enemies.length; i++) {
             
-            // Safety Check: Ensure enemy exists
             if (!enemies[i]) continue;
 
             let isHitX =
@@ -56,29 +101,52 @@ function checkBulletCollisions() {
                 bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
 
             if (isHitX && isHitY) {
-                // Audio Handling
-                try {
-                    shootSound.pause();
-                    shootSound.currentTime = 0;
-                    shootSound.play();
-                } catch (error) {}
+                // ASYNC AUDIO FIX: Catching audio promises avoids console abort errors
+                if (shootSound) {
+                    try {
+                        shootSound.pause();
+                        shootSound.currentTime = 0;
+                        let playPromise = shootSound.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => { /* Safe suppression of overlapping audio interrupts */ });
+                        }
+                    } catch (audioError) {}
+                }
 
-                alienDeathSound.volume = 0.9;
-                if (alienDeathSound.paused) alienDeathSound.play();
+                if (alienDeathSound) {
+                    alienDeathSound.volume = 0.9;
+                    if (alienDeathSound.paused) {
+                        let deathPromise = alienDeathSound.play();
+                        if (deathPromise !== undefined) {
+                            deathPromise.catch(() => {});
+                        }
+                    }
+                }
 
                 let randomSpeak = Math.random();
                 let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
-                soundToPlay.volume = 0.9;
-                soundToPlay.play();
+                if (soundToPlay) {
+                    soundToPlay.volume = 0.9;
+                    let speakPromise = soundToPlay.play();
+                    if (speakPromise !== undefined) {
+                        speakPromise.catch(() => {});
+                    }
+                }
 
-                // Apply Damage
                 enemies[i].hp -= 1;
                 enemies[i].lastHitTime = Date.now();
 
-                // Handle Death or Bullet Removal
                 if (enemies[i].hp <= 0) {
                     let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
                     score += isBoss ? 10 : 1;
+
+                    if (window.PlayerStats) {
+                        let xpGained = isBoss ? 25 : 5;
+                        let soulsGained = isBoss ? 100 : 50;
+                        
+                        window.PlayerStats.addXP(xpGained);
+                        window.PlayerStats.addSouls(soulsGained);
+                    }
 
                     enemies.splice(i, 1);
                     enemiesWaitTime.splice(i, 1);
@@ -89,7 +157,7 @@ function checkBulletCollisions() {
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
-                break; // Exit enemy loop since bullet is gone
+                break; 
             }
         }
     }
@@ -123,19 +191,18 @@ function checkEnemyPlayerCollisions() {
             enemies[i].y + 79 * imagesScale > playerYStart &&
             enemies[i].y + 79 * imagesScale < playerYEnd;
 
-        if (inRangeX && inRangeY) {
+        // Change your checkEnemyPlayerCollisions function to this:
+    if (inRangeX && inRangeY) {
+    // Only log the damage event if the cooldown has passed
+    if (currentTime - window.globalPlayerInvincibleTime > 2000) {
+        if (typeof player.hp !== 'undefined') {
+            player.hp -= 10; 
+            if (player.hp < 0) player.hp = 0;
             
-            console.log(`[CONTACT] Enemy ${i} touched player. HP: ${player.hp}. Cooldown remaining: ${Math.max(0, 2000 - (currentTime - window.globalPlayerInvincibleTime))}ms`);
-
-            if (currentTime - window.globalPlayerInvincibleTime > 2000) {
-                if (typeof player.hp !== 'undefined') {
-                    player.hp -= 10; 
-                    if (player.hp < 0) player.hp = 0;
-                    
-                    window.globalPlayerInvincibleTime = currentTime; 
-                    console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
-                }
-            }
+            window.globalPlayerInvincibleTime = currentTime; 
+            console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
+        }
+    }
 
             enemiesPlayerCollision[i] = false;
             

@@ -11,7 +11,10 @@
     <h1 class="Game-Title" style="font-family: 'Acme', sans-serif;"></h1>
 
     <div id="game-container">
+        <!-- HUD OVERLAY LAYER -->
         <div id="ui-layer">
+            
+            <!-- Left Side: Health Group -->
             <div class="ui-group health-group">
                 <div class="abilities">
                     <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
@@ -27,7 +30,30 @@
                 </div>
             </div>
 
+            <!-- Middle Side: Green Level Up Experience Bar -->
+            <div class="ui-group xp-group">
+                <div class="bar-wrapper">
+                    <div class="tube xp-tube" id="xp-tube">
+                        <div class="fill xp-fill" id="xp-fill"></div>
+                        <span class="bar-text" id="xp-text">Level 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Magic Group and Vertical Store Stack -->
             <div class="ui-group magic-group">
+                <!-- Vertical Navigation Stack Positioned Above Magic Status -->
+                <div class="store-stack">
+                    <div class="store-item" onclick="UpgradeManager.toggleStore()">
+                        <span class="store-count" id="hud-upgrades-count">0</span>
+                        <span class="store-emoji">🏪</span>
+                    </div>
+                    <div class="store-item" onclick="PerkManager.toggleStore()">
+                        <span class="store-count" id="hud-perks-count">0</span>
+                        <span class="store-emoji">💀</span>
+                    </div>
+                </div>
+
                 <div class="abilities">
                     <img src="images/ui/triangle.png" class="ability-icon ready" id="ab4">
                     <img src="images/ui/triangle.png" class="ability-icon ready" id="ab5">
@@ -41,16 +67,152 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/entities.js"></script>
-    <script src="js/abilitysystem.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/collisions.js"></script>
-    <script src="js/character.js"></script>
+    <!-- LEVEL UP INTERFACE OVERLAY -->
+    <div id="levelup-panel" class="hidden">
+        <div class="panel-wrapper container">
+            <h1 class="panel-title">LEVEL UP</h1>
+            <p class="panel-subtitle">Select a reward to empower your current run</p>
+            
+            <div class="card-grid interface">
+                <div class="reward-card" onclick="LevelUpManager.chooseHealth()">
+                    <h2 class="reward-title">HEALTH</h2>
+                    <p class="reward-desc">Increases your maximum vitality pool by 20 points and heals fully</p>
+                </div>
+
+                <div class="reward-card" onclick="LevelUpManager.chooseMagic()">
+                    <h2 class="reward-title">MAGIC</h2>
+                    <p class="reward-desc">Increases your maximum mana pool by 20 points and restores fully</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPGRADE STORE INTERFACE OVERLAY -->
+    <div id="upgrade-panel" class="hidden">
+        <div class="panel-wrapper container">
+            <h1 class="panel-title">UPGRADE STORE</h1>
+            <p class="panel-subtitle">Choose one newly unlocked mechanic for this run</p>
+            
+            <div class="card-grid interface" id="upgrade-cards-container">
+                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('lifesteal')">
+                    <h2 class="reward-title">LIFESTEAL</h2>
+                    <p class="reward-desc">Health abilities gain a baseline chance to restore your vital health points upon enemy elimination</p>
+                </div>
+
+                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('manasteal')">
+                    <h2 class="reward-title">MANASTEAL</h2>
+                    <p class="reward-desc">Magic abilities gain a baseline chance to instantly replenish spent mana resources</p>
+                </div>
+
+                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('revival')">
+                    <h2 class="reward-title">REVIVAL</h2>
+                    <p class="reward-desc">Provides a critical safety net by granting one automatic resurrection when health hits zero</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PERMANENT PERK STORE INTERFACE OVERLAY -->
+    <div id="perk-panel" class="hidden">
+        <div class="panel-wrapper container">
+            <h1 class="panel-title">PERK TREE SANCTUM</h1>
+            <p class="panel-subtitle">Spend permanent souls to fortify all future escape attempts</p>
+            
+            <div class="card-grid interface">
+                <div class="reward-card" onclick="PerkManager.purchasePerk('hp_regen')">
+                    <h2 class="reward-title">REGENERATE</h2>
+                    <p class="reward-desc">Permanently slowly mends wounds over time during active combat rounds</p>
+                </div>
+
+                <div class="reward-card" onclick="PerkManager.purchasePerk('mob_damage')">
+                    <h2 class="reward-title">FORCE AMP</h2>
+                    <p class="reward-desc">Permanently scales up your baseline damage output against overwhelming monster groups</p>
+                </div>
+
+                <div class="reward-card" onclick="PerkManager.purchasePerk('cooldown_reduction')">
+                    <h2 class="reward-title">HASTE</h2>
+                    <p class="reward-desc">Accelerates ability operational speeds by applying permanent cooldown speed reductions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="levelup-panel" class="hidden">
+    <div class="container">
+        <div class="interface-panel">
+            
+            <h2 class="menu-title">LEVEL UP!</h2>
+            
+            <div class="options-wrapper">
+                <button class="menu-toggle" onclick="LevelUpManager.chooseHealth()">
+                    <div class="card-content">
+                        <div class="avatar-space">
+                            <div class="img-avatar heart-icon"></div>
+                        </div>
+                        <div class="details">
+                            <span class="badge pink-text">New!</span>
+                            <h3 class="option-title">Increase Health</h3>
+                            <p class="body-text">Expand your maximum health capacity pool by 20 points</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="menu-toggle" onclick="LevelUpManager.chooseMagic()">
+                    <div class="card-content">
+                        <div class="avatar-space">
+                            <div class="img-avatar flower-icon"></div>
+                        </div>
+                        <div class="details">
+                            <span class="badge gold-text">Level 2</span>
+                            <h3 class="option-title">Increase Magic</h3>
+                            <p class="body-text">Expand your maximum magic energy reservoir by 20 points</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <p class="footer-note">Select an improvement to resume combat</p>
+            
+        </div>
+    </div>
+</div>
+
+                <!-- MAGIC SELECTION OPTION -->
+                <button class="menu-toggle" onclick="LevelUpManager.chooseMagic()">
+                    <div class="card-content">
+                        <div class="avatar-space">
+                            <!-- Placeholder icon or image matching the pixel flower -->
+                            <div class="img-avatar flower-icon"></div>
+                        </div>
+                        <div class="details">
+                            <span class="badge gold-text">Level 2</span>
+                            <h3 class="option-title">Increase Magic</h3>
+                            <p class="body-text">Expand your maximum magic energy reservoir by 20 points</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <p class="footer-note">Select an improvement to resume combat</p>
+            
+        </div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/playerstats.js"></script>
+<script src="js/levelupmanager.js"></script>
+<script src="js/roundmanager.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/abilitysystem.js"></script>
+<script src="js/game.js"></script>
+<script src="js/enemy.js"></script>
+<script src="js/collisions.js"></script>
+<script src="js/character.js"></script>
 
     <audio id="backgroundMusic"></audio>
     <script>
@@ -62,7 +224,7 @@
         ];
         const audio = document.getElementById("backgroundMusic");
         let hasStarted = false;
-        let isTransitioning = false; // Prevents overlapping play/pause commands
+        let isTransitioning = false; 
 
         function playRandomTrack() {
             if (isTransitioning) return; 
@@ -79,11 +241,11 @@
                 if (playPromise !== undefined) {
                     playPromise
                         .then(() => {
-                            isTransitioning = false; // Unlock once playing successfully
+                            isTransitioning = false; 
                         })
                         .catch(error => {
                             console.log("Audio thread reset handled safely.");
-                            isTransitioning = false; // Clear lock on error
+                            isTransitioning = false; 
                         });
                 } else {
                     isTransitioning = false;
@@ -93,7 +255,6 @@
             }
         }
 
-        // Listeners for seamless track shifting
         audio.addEventListener("ended", playRandomTrack);
         
         document.addEventListener("click", () => {

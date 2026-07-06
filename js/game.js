@@ -40,9 +40,12 @@ function moveDown() {
 // UI RENDER LOOP
 // ==========================================
 function updateUI() {
-    // 1. Update Health Bar (FIXED: Now reads player.hp and assumes 100 max)
-    let maxHealth = 100;
-    let currentHp = (player && player.hp !== undefined) ? player.hp : 100;
+    // Dynamically pull configuration targets from our main progression source
+    let statsSource = window.PlayerStats || { maxHealth: 100, maxMagic: 100 };
+
+    // 1. Update Health Bar
+    let maxHealth = statsSource.maxHealth;
+    let currentHp = (player && player.hp !== undefined) ? player.hp : maxHealth;
     let healthPercentage = (currentHp / maxHealth) * 100;
     
     let healthFill = document.getElementById('health-fill');
@@ -51,9 +54,9 @@ function updateUI() {
     if (healthFill) healthFill.style.width = healthPercentage + '%';
     if (healthText) healthText.innerText = currentHp + '/' + maxHealth;
 
-    // 2. Update Magic Bar (FIXED: Now reads player.magic and assumes 100 max)
-    let maxMagic = 100;
-    let currentMagic = (player && player.magic !== undefined) ? player.magic : 100;
+    // 2. Update Magic Bar
+    let maxMagic = statsSource.maxMagic;
+    let currentMagic = (player && player.magic !== undefined) ? player.magic : maxMagic;
     let magicPercentage = (currentMagic / maxMagic) * 100;
     
     let magicFill = document.getElementById('magic-fill');
@@ -76,4 +79,3 @@ function updateUI() {
         }
     }
 }
-
