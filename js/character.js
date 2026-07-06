@@ -6,19 +6,19 @@
 let playerMovementAnimation = [];
 for (let i = 0; i < 20; i++) {
     playerMovementAnimation.push(new Image());
-    playerMovementAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/move/survivor-move_shotgun_" + i.toString() + ".png";
+    playerMovementAnimation[i].src = "images/player/zizius/normal/move/zizius-move_shotgun_" + i.toString() + ".png";
 }
 
 let playerShootAnimation = [];
 for (let i = 0; i < 10; i++) {
     playerShootAnimation.push(new Image());
-    playerShootAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/shoot/survivor-shoot_shotgun_" + i.toString() + ".png";
+    playerShootAnimation[i].src = "images/player/zizius/normal/shoot/zizius-shoot_shotgun_" + i.toString() + ".png";
 }
 
 let playerIdleAnimation = [];
 for (let i = 0; i < 20; i++) {
     playerIdleAnimation.push(new Image());
-    playerIdleAnimation[i].src = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_" + i.toString() + ".png";
+    playerIdleAnimation[i].src = "images/player/zizius/normal/idle/zizius-idle_shotgun_" + i.toString() + ".png";
 }
 
 let i = 0;

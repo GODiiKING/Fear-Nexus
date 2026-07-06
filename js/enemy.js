@@ -8,7 +8,7 @@ let enemiesWaitTime = [];
 let enemiesAnimationPosition = [];
 let enemiesPlayerCollision = [];
 let spawnEnemiesInterval;
-let enemySprite = "images/tds_zombie-Copy/export/Movement/skeleton-move_0.png";
+let enemySprite = "images/enemy/demon/movement/demon-move_0.png";
 let difficulty = 0.60;
 let maxTime = 5000;
 let minTime = 100;
@@ -82,13 +82,13 @@ function spawnEnemy() {
 let enemyMovementAnimation = [];
 for (let i = 0; i < 16; i++) {
     enemyMovementAnimation.push(new Image());
-    enemyMovementAnimation[i].src = "images/tds_zombie-Copy/export/Movement/skeleton-move_" + i.toString() + ".png";
+    enemyMovementAnimation[i].src = "images/enemy/demon/movement/demon-move_" + i.toString() + ".png";
 }
 
 let enemyAttackAnimation = [];
 for (let i = 0; i < 8; i++) {
     enemyAttackAnimation.push(new Image());
-    enemyAttackAnimation[i].src = "images/tds_zombie-Copy/export/Attack/skeleton-attack_" + i.toString() + ".png";
+    enemyAttackAnimation[i].src = "images/enemy/demon/attack/demon-attack_" + i.toString() + ".png";
 }
 
 function getRandomInterval() {

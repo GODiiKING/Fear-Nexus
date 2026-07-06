@@ -51,7 +51,7 @@ let currentMinX = -1280;
 let currentMaxY = 720;
 let currentMinY = -720;
 
-let playerSprite = "images/Top_Down_Survivor-Copy/Top_Down_Survivor/shotgun/idle/survivor-idle_shotgun_0.png";
+let playerSprite = "images/player/zizius/normal/idle/zizius-idle_shotgun_0.png";
 let imagesScale = 0.6;
 
 // ==========================================
