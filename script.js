@@ -269,11 +269,13 @@ function endGame() {
 function hideUI() {
     document.querySelector('.health-group').classList.add('hidden');
     document.querySelector('.magic-group').classList.add('hidden');
+    document.querySelector('.xp-group').classList.add('hidden');
 }
 
 function showUI() {
     document.querySelector('.health-group').classList.remove('hidden');
     document.querySelector('.magic-group').classList.remove('hidden');
+    document.querySelector('.xp-group').classList.remove('hidden');
 }
 
 // ==========================================
