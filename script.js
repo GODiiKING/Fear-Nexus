@@ -181,6 +181,13 @@ let GameArea = {
 // MAIN LOOP
 // ==========================================
 
+// ==========================================
+// MAIN LOOP
+// ==========================================
+
+// Global variable tracker for passive healing ticks (Keep this outside the functions!)
+let passiveRegenTrackerTicks = 0;
+
 function updateGameArea() {
     const levelPanel = document.getElementById("levelup-panel");
     const upgradePanel = document.getElementById("upgrade-panel") || document.getElementById("upgrade-store");
@@ -202,7 +209,37 @@ function updateGameArea() {
 
     ctx.fillText(score.toString(), 640, 60);
 
-    updateUI(); 
+    // Call your UI renderer cleanly
+    if (typeof updateUI === "function") {
+        updateUI(); 
+    }
+
+    // ==========================================
+    // INTEGRATED PASSIVE REGENERATION CALCULATOR
+    // ==========================================
+    let statsSource = window.PlayerStats;
+    if (statsSource && player && !gameOver) {
+        if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+            passiveRegenTrackerTicks++;
+
+            // Every 250 frames at 20ms intervals = Exactly 5.00 seconds
+            if (passiveRegenTrackerTicks >= 250) { 
+                passiveRegenTrackerTicks = 0;
+
+                let maxHp = statsSource.maxHealth || 100;
+                let currentHp = (player.hp !== undefined) ? player.hp : maxHp;
+
+                if (currentHp < maxHp) {
+                    player.hp = Math.min(maxHp, currentHp + statsSource.healthRegen);
+                    
+                    if (typeof updateUI === "function") {
+                        updateUI();
+                    }
+                    console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + player.hp);
+                }
+            }
+        }
+    }
 
     if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
         ctx.fillStyle = "white";
@@ -312,6 +349,38 @@ function drawEnemyHealthBars(ctx) {
             
             ctx.fillStyle = '#ff0000'; 
             ctx.fillRect(barX, barY, currentBarWidth, barHeight);
+        }
+    }
+}
+
+// ==========================================
+// PASSIVE REGENERATION SYSTEM (PERK HOOKS)
+// ==========================================
+let passiveRegenTimer = 0;
+
+function runPassiveRegeneration() {
+    let statsSource = window.PlayerStats;
+    if (!statsSource || !player || gameOver) return;
+
+    // Verify if player has invested any soul points into Celestial Vitality
+    if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+        passiveRegenTimer++;
+
+        // At 20ms ticks, 250 frames equals exactly a 5-second interval loop
+        if (passiveRegenTimer >= 250) { 
+            passiveRegenTimer = 0;
+
+            let maxHp = statsSource.maxHealth || 100;
+            let currentHp = (player.hp !== undefined) ? player.hp : maxHp;
+
+            if (currentHp < maxHp) {
+                // Recover health capped cleanly at maximum parameters
+                player.hp = Math.min(maxHp, currentHp + statsSource.healthRegen);
+                
+                // Immediately synchronize visual bar changes
+                updateUI();
+                console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + player.hp);
+            }
         }
     }
 }

@@ -96,3 +96,32 @@ function updateUI() {
         }
     }
 }
+
+// ==========================================
+// PASSIVE REGENERATION SYSTEM (PERK HOOKS)
+// ==========================================
+
+function runPassiveRegeneration() {
+    let statsSource = window.PlayerStats;
+    if (!statsSource || !player || gameOver) return;
+
+    // Check if the player has unlocked any ranks in Celestial Vitality
+    if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+        passiveRegenTimer++;
+
+        // Syncs with your update ticks (approx 5 seconds based on your typical waitTime metrics)
+        if (passiveRegenTimer >= 300) { 
+            passiveRegenTimer = 0;
+
+            // Make sure player isn't dead and isn't already full health
+            let maxHp = statsSource.maxHealth || 100;
+            if (player.hp < maxHp) {
+                // Add flat health points matching the perk level/rank
+                player.hp = Math.min(maxHp, player.hp + statsSource.healthRegen);
+                
+                // Instantly sync the health tube fill bar on screen
+                updateUI();
+            }
+        }
+    }
+}

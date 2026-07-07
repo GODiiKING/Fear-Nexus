@@ -1,7 +1,195 @@
-// ==========================================
-// LEVEL UP MANAGER
-// ==========================================
+"use strict";
 
+// ==========================================
+// METAGAME PERK DATA & MANAGEMENT
+// ==========================================
+window.PerkManager = {
+    // We point this directly to PlayerStats via getter/setter to avoid duplication bugs!
+    get souls() {
+        return window.PlayerStats ? window.PlayerStats.souls : 0;
+    },
+    set souls(val) {
+        if (window.PlayerStats) window.PlayerStats.souls = val;
+    },
+
+    trees: {
+        healthRegen: {
+            name: "Celestial Vitality",
+            desc: "Regenerate health passively over time",
+            cost: 100,
+            level: 0,
+            maxLevel: 16,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.healthRegen = this.level; 
+            }
+        },
+        magicRegen: {
+            name: "Astral Attunement",
+            desc: "Regenerate mana points over time",
+            cost: 100,
+            level: 0,
+            maxLevel: 16,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.magicRegen = this.level;
+            }
+        },
+        mobDamage: {
+            name: "Horde Cleaver",
+            desc: "Deal increased permanent strike damage to standard minions",
+            cost: 120,
+            level: 0,
+            maxLevel: 16,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.mobDamageBonus = this.level * 1; 
+            }
+        },
+        bossDamage: {
+            name: "Titan Slayer",
+            desc: "Deal increased permanent strike damage against catastrophic bosses",
+            cost: 150,
+            level: 0,
+            maxLevel: 16,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.bossDamageBonus = this.level * 2;
+            }
+        },
+        damageMitigation: {
+            name: "Cosmic Shell",
+            desc: "Permanently mitigate a percentage of incoming enemy damage",
+            cost: 150,
+            level: 0,
+            maxLevel: 10,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.damageMitigation = this.level * 0.05;
+            }
+        },
+        cooldownReduction: {
+            name: "Time Warp",
+            desc: "Accelerate cosmic ability reload frequencies",
+            cost: 200,
+            level: 0,
+            maxLevel: 10,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.cooldownReduction = this.level * 0.05;
+            }
+        },
+        xpGain: {
+            name: "Starlight Wisdom",
+            desc: "Amplify total combat experience acquisition values",
+            cost: 120,
+            level: 0,
+            maxLevel: 10,
+            apply() {
+                if (window.PlayerStats) window.PlayerStats.xpMultiplier = 1 + (this.level * 0.05);
+            }
+        }
+    },
+
+    addSouls(amount) {
+        if (window.PlayerStats && typeof window.PlayerStats.addSouls === "function") {
+            window.PlayerStats.addSouls(amount);
+        } else {
+            this.souls += amount;
+        }
+        window.PerkStoreManager.updateUI();
+    },
+
+    buy(treeName) {
+        let tree = this.trees[treeName];
+        if (!tree) return;
+
+        if (this.souls >= tree.cost && tree.level < tree.maxLevel) {
+            this.souls -= tree.cost;
+            tree.level++;
+            tree.apply();
+            
+            // Post purchase cost scaling mechanics
+            tree.cost = Math.floor(tree.cost * 1.25);
+            
+            // Sync display layouts completely
+            if (window.PlayerStats && typeof window.PlayerStats.renderSoulCounter === "function") {
+                window.PlayerStats.renderSoulCounter();
+            }
+            window.PerkStoreManager.updateUI();
+            console.log(`[PERK PURCHASED] ${tree.name} upgraded to rank ${tree.level}`);
+        } else {
+            console.log("Not enough souls available or perk maxed out.");
+        }
+    }
+};
+
+// ==========================================
+// UNIFIED PERMANENT PERK STORE MANAGER
+// ==========================================
+window.PerkStoreManager = {
+    open() {
+        const panel = document.getElementById("perk-panel");
+        if (panel) panel.classList.remove("hidden");
+        
+        if (typeof GameArea !== "undefined" && GameArea.interval) {
+            clearInterval(GameArea.interval);
+            console.log("[PERK STORE OPEN] Game paused.");
+        }
+        this.updateUI();
+    },
+
+    toggleStore() {
+        const panel = document.getElementById("perk-panel");
+        if (panel) {
+            if (panel.classList.contains("hidden")) {
+                this.open();
+            } else {
+                this.close();
+            }
+        }
+    },
+
+    buyPerk(treeName) {
+        // Routes card selection directly through the scaling pricing architecture above
+        window.PerkManager.buy(treeName);
+    },
+
+    close() {
+        const panel = document.getElementById("perk-panel");
+        if (panel) panel.classList.add("hidden");
+
+        if (typeof GameArea !== "undefined") {
+            clearInterval(GameArea.interval); 
+            GameArea.interval = setInterval(updateGameArea, 20);
+            console.log("[PERK STORE CLOSED] Game resumed.");
+        }
+    },
+
+    updateUI() {
+        // Synchronize display text directly with current core global currency state
+        const hudCount = document.getElementById("hud-perks-count");
+        if (hudCount) {
+            hudCount.innerText = window.PerkManager.souls;
+        }
+
+        // Dynamically iterate through cards to adjust badges, ranks and maxed conditions
+        Object.keys(window.PerkManager.trees).forEach(key => {
+            const tree = window.PerkManager.trees[key];
+            const costBadge = document.getElementById(`cost-${key}`);
+            const levelText = document.getElementById(`level-${key}`);
+            const cardElement = document.getElementById(`card-${key}`);
+
+            if (costBadge) {
+                costBadge.innerText = tree.level >= tree.maxLevel ? "MAXED" : `${tree.cost} Souls`;
+            }
+            if (levelText) {
+                levelText.innerText = `Rank: ${tree.level}/${tree.maxLevel}`;
+            }
+            if (cardElement && tree.level >= tree.maxLevel) {
+                cardElement.classList.add("maxed-perk"); 
+            }
+        });
+    }
+};
+
+// ==========================================
+// IN-RUN LEVEL UP SELECTION MANAGER
+// ==========================================
 window.LevelUpManager = {
     open() {
         const panel = document.getElementById("levelup-panel");
@@ -48,7 +236,7 @@ window.LevelUpManager = {
 };
 
 // ==========================================
-// UPGRADE STORE MANAGER (🏪 Icon)
+// TEMPORARY RUN UPGRADE STORE MANAGER (🏪)
 // ==========================================
 window.UpgradeManager = {
     open() {
@@ -74,7 +262,6 @@ window.UpgradeManager = {
 
     selectUpgrade(upgradeType) {
         console.log(`Selected upgrade modifier: ${upgradeType}`);
-        // Your logic for lifesteal, manasteal, or revival triggers goes here
         this.close();
     },
 
@@ -86,57 +273,6 @@ window.UpgradeManager = {
             clearInterval(GameArea.interval); 
             GameArea.interval = setInterval(updateGameArea, 20);
             console.log("[UPGRADE STORE CLOSED] Game resumed.");
-        }
-    }
-};
-
-// ==========================================
-// PERMANENT PERK STORE MANAGER (💀 Icon)
-// ==========================================
-window.PerkStoreManager = {
-    open() {
-        const panel = document.getElementById("perk-panel");
-        if (panel) panel.classList.remove("hidden");
-        
-        if (typeof GameArea !== "undefined" && GameArea.interval) {
-            clearInterval(GameArea.interval);
-            console.log("[PERK STORE OPEN] Game paused.");
-        }
-    },
-
-    toggleStore() {
-        const panel = document.getElementById("perk-panel");
-        if (panel) {
-            if (panel.classList.contains("hidden")) {
-                this.open();
-            } else {
-                this.close();
-            }
-        }
-    },
-
-    buyPerk(perkType, cost) {
-        if (typeof PlayerStats !== "undefined" && PlayerStats.souls >= cost) {
-            PlayerStats.souls -= cost;
-            console.log(`Purchased ${perkType} for ${cost} souls.`);
-            
-            if (perkType === "damage") PlayerStats.increaseDamage();
-            if (perkType === "speed") PlayerStats.increaseSpeed();
-            
-            this.close();
-        } else {
-            console.log("Not enough souls available.");
-        }
-    },
-
-    close() {
-        const panel = document.getElementById("perk-panel");
-        if (panel) panel.classList.add("hidden");
-
-        if (typeof GameArea !== "undefined") {
-            clearInterval(GameArea.interval); 
-            GameArea.interval = setInterval(updateGameArea, 20);
-            console.log("[PERK STORE CLOSED] Game resumed.");
         }
     }
 };
