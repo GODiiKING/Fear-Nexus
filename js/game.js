@@ -39,11 +39,16 @@ function moveDown() {
 // ==========================================
 // UI RENDER LOOP
 // ==========================================
+"use strict";
+
+// ==========================================
+// CENTRALIZED MASTER UI RENDER LOOP
+// ==========================================
 function updateUI() {
     // Dynamically pull configuration targets from our main progression source
-    let statsSource = window.PlayerStats || { maxHealth: 100, maxMagic: 100 };
+    let statsSource = window.PlayerStats || { maxHealth: 100, maxMagic: 100, level: 1, souls: 0 };
 
-    // 1. Update Health Bar
+    // 1. Update Health Bar Display
     let maxHealth = statsSource.maxHealth;
     let currentHp = (player && player.hp !== undefined) ? player.hp : maxHealth;
     let healthPercentage = (currentHp / maxHealth) * 100;
@@ -54,7 +59,7 @@ function updateUI() {
     if (healthFill) healthFill.style.width = healthPercentage + '%';
     if (healthText) healthText.innerText = currentHp + '/' + maxHealth;
 
-    // 2. Update Magic Bar
+    // 2. Update Magic Bar Display
     let maxMagic = statsSource.maxMagic;
     let currentMagic = (player && player.magic !== undefined) ? player.magic : maxMagic;
     let magicPercentage = (currentMagic / maxMagic) * 100;
@@ -65,7 +70,19 @@ function updateUI() {
     if (magicFill) magicFill.style.width = magicPercentage + '%';
     if (magicText) magicText.innerText = currentMagic + '/' + maxMagic;
 
-    // 3. Update Ability Glows
+    // 3. Update Level/XP Tracker Text Display
+    let xpText = document.getElementById('xp-text');
+    if (xpText) {
+        xpText.innerText = "Level " + (statsSource.level || 1);
+    }
+
+    // 4. Update Soul Tracker HUD Count Display
+    let soulsHUDCount = document.getElementById('hud-perks-count');
+    if (soulsHUDCount) {
+        soulsHUDCount.innerText = statsSource.souls !== undefined ? statsSource.souls : 0;
+    }
+
+    // 5. Update Ability Grid Action Icon Glows
     for (let i = 1; i <= 6; i++) {
         let abId = 'ab' + i;
         let icon = document.getElementById(abId);

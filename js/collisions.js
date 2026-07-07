@@ -37,53 +37,6 @@ function updateBullets() {
 }
 
 // ==========================================
-// UI RENDER LOOP (INTEGRATION UPDATE)
-// ==========================================
-function updateUI() {
-    // 1. Update Health Bar using global PlayerStats limits
-    let maxHealth = window.PlayerStats ? window.PlayerStats.maxHealth : 100;
-    let currentHp = (player && player.hp !== undefined) ? player.hp : maxHealth;
-    let healthPercentage = (currentHp / maxHealth) * 100;
-    
-    let healthFill = document.getElementById('health-fill');
-    let healthText = document.getElementById('health-text');
-    
-    if (healthFill) healthFill.style.width = healthPercentage + '%';
-    if (healthText) healthText.innerText = currentHp + '/' + maxHealth;
-
-    // 2. Update Magic Bar using global PlayerStats limits
-    let maxMagic = window.PlayerStats ? window.PlayerStats.maxMagic : 100;
-    let currentMagic = (player && player.magic !== undefined) ? player.magic : maxMagic;
-    let magicPercentage = (currentMagic / maxMagic) * 100;
-    
-    let magicFill = document.getElementById('magic-fill');
-    let magicText = document.getElementById('magic-text');
-    
-    if (magicFill) magicFill.style.width = magicPercentage + '%';
-    if (magicText) magicText.innerText = currentMagic + '/' + maxMagic;
-
-    // 3. Optional visual updates for Level and Souls if elements exist
-    let levelText = document.getElementById('level-text');
-    if (levelText && window.PlayerStats) {
-        levelText.innerText = "Level " + window.PlayerStats.level;
-    }
-
-    // 4. Update Ability Glows
-    for (let i = 1; i <= 6; i++) {
-        let abId = 'ab' + i;
-        let icon = document.getElementById(abId);
-        
-        if (icon && typeof abilitiesReady !== 'undefined' && abilitiesReady[abId]) {
-            icon.classList.remove('cooldown');
-            icon.classList.add('ready');
-        } else if (icon) {
-            icon.classList.remove('ready');
-            icon.classList.add('cooldown');
-        }
-    }
-}
-
-// ==========================================
 // BULLET HIT DETECTION (STABILITY PATCH)
 // ==========================================
 function checkBulletCollisions() {
