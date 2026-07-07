@@ -18,60 +18,47 @@ function startGame() {
         0
     );
 
-    // Inside startGame() in script.js
+    // Consolidated keyboard listener with input field protection
     window.addEventListener("keydown", function(e) {
-    if (e.key === '1' || e.key === '2') {
-        console.log("Key captured in main loop:", e.key);
-        if (window.abilitySystem) {
-            window.abilitySystem.handleKey(e.key);
-        } else {
-            console.error("Ability System not found!");
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+            return;
         }
-    }
-});
+
+        console.log("Keyboard activity detected: " + e.key);
+        
+        if (e.key === '1' || e.key === '2') {
+            console.log("Key captured in main loop:", e.key);
+            if (window.abilitySystem) {
+                window.abilitySystem.handleKey(e.key);
+            } else {
+                console.error("Ability System not found!");
+            }
+        }
+        
+        // Z Key controls the temporary run Upgrade Store
+        if (e.key === 'z' || e.key === 'Z') {
+            console.log("Z key detected by the input listener!");
+            if (window.UpgradeManager) {
+                window.UpgradeManager.toggleStore();
+            } else {
+                console.error("UpgradeManager object could not be found on the window context!");
+            }
+        }
+
+        // X Key controls the permanent celestial Perk Store
+        if (e.key === 'x' || e.key === 'X') {
+            console.log("X key detected by the input listener!");
+            if (window.PerkStoreManager) {
+                window.PerkStoreManager.toggleStore();
+            } else {
+                console.error("PerkStoreManager object could not be found on the window context!");
+            }
+        }
+    });
 
     // Bulletproof: Force initialize stats if they aren't set yet
     player.hp = 100;
     player.magic = 100;
-
-    // ==========================================
-    // THE HP SPY TRACKER
-    // ==========================================
-    // let actualHp = 100; 
-    // Object.defineProperty(player, 'hp', {
-    //     get: function() { 
-    //         return actualHp; 
-    //     },
-    //     set: function(newValue) {
-    //         if (newValue < actualHp) {
-    //             console.warn(`[HP LEAK DETECTED] HP is being changed from ${actualHp} to ${newValue}!`);
-    //             console.trace("Busted! Look below to see the line that caused this:");
-    //         }
-    //         actualHp = newValue;
-    //     }
-    // });
-
-    // ==========================================
-    // THE MAGIC SPY TRACKER
-    // ==========================================
-    // let actualMagic = 100; 
-    // Object.defineProperty(player, 'magic', {
-    //     get: function() { 
-    //         return actualMagic; 
-    //     },
-    //     set: function(newValue) {
-    //         if (newValue < actualMagic) {
-    //             console.log(`[MAGIC TRACKER] Magic decreased from ${actualMagic} to ${newValue}`);
-    //         }
-    //         actualMagic = newValue;
-            
-    //         // NOTE: If your updateUI() function isn't updating your visual bar element, 
-    //         // you can safely uncomment the lines below to force-update its CSS width:
-    //         // let magicBar = document.querySelector('.magic-bar');
-    //         // if (magicBar) magicBar.style.width = actualMagic + '%';
-    //     }
-    // });
-    // ==========================================
 
     grass1 = new Component(1280, 720, "images/background/bg3.png", -1280, 720, "grass");
     grass2 = new Component(1280, 720, "images/background/bg3.png", 0, 720, "grass");
@@ -137,16 +124,14 @@ function startGame() {
     window.addEventListener("mousedown", (e) => {
         if (gameOver) return;
 
-        // Direct safety check
         if (player.magic === undefined) player.magic = 100;
 
         if (e.button === 0) {
             Shoot(e);
         } 
-        // FIXED: Stripped out the ambiguous checks breaking the system
         else if (e.button === 2) {
             if (player.magic >= 10) {
-                player.magic -= 10; // Safely runs through our tracker property now
+                player.magic -= 10; 
                 
                 let fakeLeftClickEvent = {
                     button: 0,
@@ -197,10 +182,18 @@ let GameArea = {
 // ==========================================
 
 function updateGameArea() {
-    // Check if the store is open by checking if the panel is visible
-    const panel = document.getElementById("levelup-panel");
-    if (panel && !panel.classList.contains("hidden")) {
-        return; // Exit the function immediately, freezing the game
+    const levelPanel = document.getElementById("levelup-panel");
+    const upgradePanel = document.getElementById("upgrade-panel") || document.getElementById("upgrade-store");
+    const perkPanel = document.getElementById("perk-panel");
+
+    if (levelPanel && !levelPanel.classList.contains("hidden")) {
+        return; 
+    }
+    if (upgradePanel && !upgradePanel.classList.contains("hidden")) {
+        return; 
+    }
+    if (perkPanel && !perkPanel.classList.contains("hidden")) {
+        return; 
     }
 
     GameArea.clear();
@@ -211,7 +204,6 @@ function updateGameArea() {
 
     updateUI(); 
 
-    // SAFE VERSION: Checks if abilitySystem exists before trying to access it
     if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";

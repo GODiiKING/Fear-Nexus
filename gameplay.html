@@ -11,10 +11,8 @@
     <h1 class="Game-Title" style="font-family: 'Acme', sans-serif;"></h1>
 
     <div id="game-container">
-        <!-- HUD OVERLAY LAYER -->
         <div id="ui-layer">
             
-            <!-- Left Side: Health Group -->
             <div class="ui-group health-group">
                 <div class="abilities">
                     <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
@@ -30,7 +28,6 @@
                 </div>
             </div>
 
-            <!-- Middle Side: Green Level Up Experience Bar -->
             <div class="ui-group xp-group">
                 <div class="bar-wrapper">
                     <div class="tube xp-tube" id="xp-tube">
@@ -40,15 +37,13 @@
                 </div>
             </div>
 
-            <!-- Right Side: Magic Group and Vertical Store Stack -->
             <div class="ui-group magic-group">
-                <!-- Vertical Navigation Stack Positioned Above Magic Status -->
                 <div class="store-stack">
                     <div class="store-item" onclick="UpgradeManager.toggleStore()">
                         <span class="store-count" id="hud-upgrades-count">0</span>
                         <span class="store-emoji">🏪</span>
                     </div>
-                    <div class="store-item" onclick="PerkManager.toggleStore()">
+                    <div class="store-item" onclick="PerkStoreManager.toggleStore()">
                         <span class="store-count" id="hud-perks-count">0</span>
                         <span class="store-emoji">💀</span>
                     </div>
@@ -71,7 +66,6 @@
         </div>
     </div>
 
-    <!-- LEVEL UP INTERFACE OVERLAY -->
     <div id="levelup-panel" class="hidden">
         <div class="panel-wrapper container">
             <h1 class="panel-title">LEVEL UP</h1>
@@ -91,7 +85,6 @@
         </div>
     </div>
 
-    <!-- UPGRADE STORE INTERFACE OVERLAY -->
     <div id="upgrade-panel" class="hidden">
         <div class="panel-wrapper container">
             <h1 class="panel-title">UPGRADE STORE</h1>
@@ -116,103 +109,45 @@
         </div>
     </div>
 
-    <!-- PERMANENT PERK STORE INTERFACE OVERLAY -->
     <div id="perk-panel" class="hidden">
         <div class="panel-wrapper container">
-            <h1 class="panel-title">PERK TREE SANCTUM</h1>
-            <p class="panel-subtitle">Spend permanent souls to fortify all future escape attempts</p>
+            <h1 class="panel-title">PERK STORE</h1>
+            <p class="panel-subtitle">Exchange your collected souls for celestial enhancements</p>
             
             <div class="card-grid interface">
-                <div class="reward-card" onclick="PerkManager.purchasePerk('hp_regen')">
-                    <h2 class="reward-title">REGENERATE</h2>
-                    <p class="reward-desc">Permanently slowly mends wounds over time during active combat rounds</p>
+                
+                <div class="reward-card" onclick="PerkStoreManager.buyPerk('damage', 50)">
+                    <h2 class="reward-title">Sharp Edge</h2>
+                    <p class="reward-desc">Boost global strike damage</p>
+                    <div class="badge pink-text" style="position: relative; margin-top: 15px; display: block;">50 Souls</div>
                 </div>
 
-                <div class="reward-card" onclick="PerkManager.purchasePerk('mob_damage')">
-                    <h2 class="reward-title">FORCE AMP</h2>
-                    <p class="reward-desc">Permanently scales up your baseline damage output against overwhelming monster groups</p>
+                <div class="reward-card" onclick="PerkStoreManager.buyPerk('speed', 50)">
+                    <h2 class="reward-title">Cosmic Fleet</h2>
+                    <p class="reward-desc">Increase movement velocity</p>
+                    <div class="badge gold-text" style="position: relative; margin-top: 15px; display: block;">50 Souls</div>
                 </div>
 
-                <div class="reward-card" onclick="PerkManager.purchasePerk('cooldown_reduction')">
-                    <h2 class="reward-title">HASTE</h2>
-                    <p class="reward-desc">Accelerates ability operational speeds by applying permanent cooldown speed reductions</p>
+                <div class="reward-card" onclick="PerkStoreManager.buyPerk('health', 75)">
+                    <h2 class="reward-title">Star Core</h2>
+                    <p class="reward-desc">Instantly restore full health</p>
+                    <div class="badge pink-text" style="position: relative; margin-top: 15px; display: block;">75 Souls</div>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <div id="levelup-panel" class="hidden">
-    <div class="container">
-        <div class="interface-panel">
-            
-            <h2 class="menu-title">LEVEL UP!</h2>
-            
-            <div class="options-wrapper">
-                <button class="menu-toggle" onclick="LevelUpManager.chooseHealth()">
-                    <div class="card-content">
-                        <div class="avatar-space">
-                            <div class="img-avatar heart-icon"></div>
-                        </div>
-                        <div class="details">
-                            <span class="badge pink-text">New!</span>
-                            <h3 class="option-title">Increase Health</h3>
-                            <p class="body-text">Expand your maximum health capacity pool by 20 points</p>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="menu-toggle" onclick="LevelUpManager.chooseMagic()">
-                    <div class="card-content">
-                        <div class="avatar-space">
-                            <div class="img-avatar flower-icon"></div>
-                        </div>
-                        <div class="details">
-                            <span class="badge gold-text">Level 2</span>
-                            <h3 class="option-title">Increase Magic</h3>
-                            <p class="body-text">Expand your maximum magic energy reservoir by 20 points</p>
-                        </div>
-                    </div>
-                </button>
-            </div>
-
-            <p class="footer-note">Select an improvement to resume combat</p>
-            
-        </div>
-    </div>
-</div>
-
-                <!-- MAGIC SELECTION OPTION -->
-                <button class="menu-toggle" onclick="LevelUpManager.chooseMagic()">
-                    <div class="card-content">
-                        <div class="avatar-space">
-                            <!-- Placeholder icon or image matching the pixel flower -->
-                            <div class="img-avatar flower-icon"></div>
-                        </div>
-                        <div class="details">
-                            <span class="badge gold-text">Level 2</span>
-                            <h3 class="option-title">Increase Magic</h3>
-                            <p class="body-text">Expand your maximum magic energy reservoir by 20 points</p>
-                        </div>
-                    </div>
-                </button>
-            </div>
-
-            <p class="footer-note">Select an improvement to resume combat</p>
-            
-        </div>
-    </div>
-</div>
-
-<script src="js/config.js"></script>
-<script src="js/playerstats.js"></script>
-<script src="js/levelupmanager.js"></script>
-<script src="js/roundmanager.js"></script>
-<script src="js/entities.js"></script>
-<script src="js/abilitysystem.js"></script>
-<script src="js/game.js"></script>
-<script src="js/enemy.js"></script>
-<script src="js/collisions.js"></script>
-<script src="js/character.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/playerstats.js"></script>
+    <script src="js/levelupmanager.js"></script>
+    <script src="js/roundmanager.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/abilitysystem.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/collisions.js"></script>
+    <script src="js/character.js"></script>
 
     <audio id="backgroundMusic"></audio>
     <script>
@@ -244,7 +179,7 @@
                             isTransitioning = false; 
                         })
                         .catch(error => {
-                            console.log("Audio thread reset handled safely.");
+                            console.log("Audio thread safely intercepted.");
                             isTransitioning = false; 
                         });
                 } else {

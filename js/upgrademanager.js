@@ -3,29 +3,194 @@ window.UpgradeManager = {
     upgrades: {
         lifesteal: {
             id: "lifesteal",
-            requirement: () => PlayerStats.healthKills >= 2,
-            apply: () => { window.hasLifesteal = true; }
+            requirement: () => {
+                if (window.PlayerStats && window.PlayerStats.healthKills !== undefined) {
+                    return window.PlayerStats.healthKills >= 2;
+                }
+                return true;
+            },
+            apply: () => { 
+                window.hasLifesteal = true; 
+                console.log("Lifesteal unlocked");
+            }
         },
         manasteal: {
             id: "manasteal",
-            requirement: () => PlayerStats.magicKills >= 2,
-            apply: () => { window.hasManasteal = true; }
+            requirement: () => {
+                if (window.PlayerStats && window.PlayerStats.magicKills !== undefined) {
+                    return window.PlayerStats.magicKills >= 2;
+                }
+                return true;
+            },
+            apply: () => { 
+                window.hasManasteal = true; 
+                console.log("Manasteal unlocked");
+            }
         },
         revival: {
             id: "revival",
-            requirement: () => RoundManager.round >= 1,
-            apply: () => { window.hasRevival = true; }
+            requirement: () => {
+                if (window.RoundManager && window.RoundManager.round !== undefined) {
+                    return window.RoundManager.round >= 1;
+                }
+                return true;
+            },
+            apply: () => { 
+                window.hasRevival = true; 
+                console.log("Revival safety shield ready");
+            }
         }
     },
 
-    open() {
-        gamePaused = true;
-        document.getElementById("upgrade-store").style.display = "block";
+    toggleStore() {
+        // Checks both potential element IDs to ensure a match with your HTML layout
+        const panel = document.getElementById("upgrade-panel") || document.getElementById("upgrade-store");
+        
+        if (!panel) {
+            console.error("Shop layout element not found in the DOM structure");
+            return;
+        }
+
+        panel.classList.toggle("hidden");
+
+        // Force system display properties if the CSS classes are overridden
+        if (panel.classList.contains("hidden")) {
+            panel.style.display = "none";
+        } else {
+            panel.style.display = "block";
+            if (typeof this.updateStoreUI === "function") {
+                this.updateStoreUI();
+            }
+        }
     },
 
-    choose(id) {
-        this.upgrades[id].apply();
-        document.getElementById("upgrade-store").style.display = "none";
-        gamePaused = false;
+    selectUpgrade(id) {
+        const upgrade = this.upgrades[id];
+        if (!upgrade) return;
+
+        if (upgrade.requirement()) {
+            upgrade.apply();
+            this.toggleStore(); 
+        } else {
+            console.log("Unlock prerequisites not achieved yet");
+        }
     }
 };
+
+window.LevelUpManager = {
+    chooseHealth() {
+        if (window.player) {
+            if (window.player.maxHp === undefined) {
+                window.player.maxHp = 100;
+            }
+            window.player.maxHp += 20;
+            window.player.hp = window.player.maxHp;
+            console.log("Vitality expanded to " + window.player.maxHp);
+        }
+        this.dismissPanel();
+    },
+
+    chooseMagic() {
+        if (window.player) {
+            if (window.player.maxMagic === undefined) {
+                window.player.maxMagic = 100;
+            }
+            window.player.maxMagic += 20;
+            window.player.magic = window.player.maxMagic;
+            console.log("Arcane reservoir expanded to " + window.player.maxMagic);
+        }
+        this.dismissPanel();
+    },
+
+    dismissPanel() {
+        const panel = document.getElementById("levelup-panel");
+        if (panel) {
+            panel.classList.add("hidden");
+            panel.style.display = "none";
+        }
+    }
+};
+
+window.LevelUpManager = {
+    chooseHealth() {
+        if (window.player) {
+            if (window.player.maxHp === undefined) {
+                window.player.maxHp = 100;
+            }
+            window.player.maxHp += 20;
+            window.player.hp = window.player.maxHp;
+            console.log("Vitality expanded to " + window.player.maxHp);
+        }
+        this.dismissPanel();
+    },
+
+    chooseMagic() {
+        if (window.player) {
+            if (window.player.maxMagic === undefined) {
+                window.player.maxMagic = 100;
+            }
+            window.player.maxMagic += 20;
+            window.player.magic = window.player.maxMagic;
+            console.log("Arcane reservoir expanded to " + window.player.maxMagic);
+        }
+        this.dismissPanel();
+    },
+
+    dismissPanel() {
+        const panel = document.getElementById("levelup-panel");
+        if (panel) {
+            panel.classList.add("hidden");
+        }
+    }
+};
+
+window.PerkStoreManager = {
+    open() {
+        const panel = document.getElementById("perk_store_panel");
+        if (panel) panel.classList.remove("hidden");
+        
+        if (typeof GameArea !== "undefined" && GameArea.interval) {
+            clearInterval(GameArea.interval);
+            console.log("[PERK STORE OPEN] Game paused.");
+        }
+    },
+
+    toggleStore() {
+        const panel = document.getElementById("perk_store_panel");
+        if (panel) {
+            if (panel.classList.contains("hidden")) {
+                this.open();
+            } else {
+                this.close();
+            }
+        }
+    },
+
+    buyPerk(perkType, cost) {
+        if (typeof PlayerStats !== "undefined" && PlayerStats.souls >= cost) {
+            PlayerStats.souls -= cost;
+            console.log(`Purchased ${perkType} for ${cost} souls.`);
+            
+            if (perkType === "damage") PlayerStats.increaseDamage();
+            if (perkType === "speed") PlayerStats.increaseSpeed();
+            
+            this.close();
+        } else {
+            console.log("Not enough souls available.");
+        }
+    },
+
+    close() {
+        const panel = document.getElementById("perk_store_panel");
+        if (panel) panel.classList.add("hidden");
+
+        if (typeof GameArea !== "undefined") {
+            clearInterval(GameArea.interval); 
+            GameArea.interval = setInterval(updateGameArea, 20);
+            console.log("[PERK STORE CLOSED] Game resumed.");
+        }
+    }
+};
+
+// Route the Z key upgrade manager directly to the Perk Store
+window.UpgradeManager = window.PerkStoreManager;
