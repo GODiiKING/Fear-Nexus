@@ -52,19 +52,24 @@ function handleMovementRelease(event) {
     }
 }
 
+// SAFE SHARED ENGINE CORE: Triggers your exact working bullet logic
+function executeProjectileLaunch() {
+    shootAnimationOver = false;
+    bulletActive = true;
+    bulletAngle = player.angle;
+
+    bullets.forEach(bullet => {
+        bullet.x = 640;
+        bullet.y = 360;
+        bullet.angle = player.angle;
+    });
+
+    canShoot = false;
+}
+
 function Shoot(event) {
     if (event.button === 0 && canShoot && !gameOver) {
-        shootAnimationOver = false;
-        bulletActive = true;
-        bulletAngle = player.angle;
-
-        bullets.forEach(bullet => {
-            bullet.x = 640;
-            bullet.y = 360;
-            bullet.angle = player.angle;
-        });
-
-        canShoot = false;
+        executeProjectileLaunch();
     }
 }
 

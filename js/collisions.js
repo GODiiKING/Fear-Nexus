@@ -191,9 +191,7 @@ function checkEnemyPlayerCollisions() {
             enemies[i].y + 79 * imagesScale > playerYStart &&
             enemies[i].y + 79 * imagesScale < playerYEnd;
 
-        // Change your checkEnemyPlayerCollisions function to this:
     if (inRangeX && inRangeY) {
-    // Only log the damage event if the cooldown has passed
     if (currentTime - window.globalPlayerInvincibleTime > 2000) {
         if (typeof player.hp !== 'undefined') {
             player.hp -= 10; 
@@ -206,7 +204,6 @@ function checkEnemyPlayerCollisions() {
 
             enemiesPlayerCollision[i] = false;
             
-            // SAFETY FIX: Prevents the script from crashing if the function isn't found
             if (typeof enemyAttackAnimationFunction === 'function') {
                 enemyAttackAnimationFunction(i);
             }
@@ -241,12 +238,9 @@ function moveEnemies() {
             enemies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
             enemies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
 
-            // SAFETY FIX: Prevents the script from crashing if the function isn't found
             if (typeof enemyMovementAnimationFunction === 'function') {
                 enemyMovementAnimationFunction(i);
             }
         }
-
     }
-
 }
