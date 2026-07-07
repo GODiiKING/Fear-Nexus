@@ -181,13 +181,6 @@ let GameArea = {
 // MAIN LOOP
 // ==========================================
 
-// ==========================================
-// MAIN LOOP
-// ==========================================
-
-// Global variable tracker for passive healing ticks (Keep this outside the functions!)
-let passiveRegenTrackerTicks = 0;
-
 function updateGameArea() {
     const levelPanel = document.getElementById("levelup-panel");
     const upgradePanel = document.getElementById("upgrade-panel") || document.getElementById("upgrade-store");
@@ -209,37 +202,12 @@ function updateGameArea() {
 
     ctx.fillText(score.toString(), 640, 60);
 
-    // Call your UI renderer cleanly
-    if (typeof updateUI === "function") {
-        updateUI(); 
-    }
-
+    updateUI(); 
+    
     // ==========================================
-    // INTEGRATED PASSIVE REGENERATION CALCULATOR
+    // RUN ACTIVE PERK PROCESSING UTILITIES
     // ==========================================
-    let statsSource = window.PlayerStats;
-    if (statsSource && player && !gameOver) {
-        if (statsSource.healthRegen && statsSource.healthRegen > 0) {
-            passiveRegenTrackerTicks++;
-
-            // Every 250 frames at 20ms intervals = Exactly 5.00 seconds
-            if (passiveRegenTrackerTicks >= 250) { 
-                passiveRegenTrackerTicks = 0;
-
-                let maxHp = statsSource.maxHealth || 100;
-                let currentHp = (player.hp !== undefined) ? player.hp : maxHp;
-
-                if (currentHp < maxHp) {
-                    player.hp = Math.min(maxHp, currentHp + statsSource.healthRegen);
-                    
-                    if (typeof updateUI === "function") {
-                        updateUI();
-                    }
-                    console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + player.hp);
-                }
-            }
-        }
-    }
+    runPassiveRegeneration();
 
     if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
         ctx.fillStyle = "white";
@@ -360,26 +328,43 @@ let passiveRegenTimer = 0;
 
 function runPassiveRegeneration() {
     let statsSource = window.PlayerStats;
-    if (!statsSource || !player || gameOver) return;
+    if (!statsSource || gameOver) return;
 
-    // Verify if player has invested any soul points into Celestial Vitality
-    if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+    // Tick the clock if either regeneration perk has active investments
+    if ((statsSource.healthRegen && statsSource.healthRegen > 0) || 
+        (statsSource.magicRegen && statsSource.magicRegen > 0)) {
+        
         passiveRegenTimer++;
 
         // At 20ms ticks, 250 frames equals exactly a 5-second interval loop
         if (passiveRegenTimer >= 250) { 
             passiveRegenTimer = 0;
 
-            let maxHp = statsSource.maxHealth || 100;
-            let currentHp = (player.hp !== undefined) ? player.hp : maxHp;
+            let needsVisualRefresh = false;
 
-            if (currentHp < maxHp) {
-                // Recover health capped cleanly at maximum parameters
-                player.hp = Math.min(maxHp, currentHp + statsSource.healthRegen);
-                
-                // Immediately synchronize visual bar changes
+            // --- CELESTIAL VITALITY (HEALTH) ---
+            if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+                if (playerHealth < maxHealth) {
+                    playerHealth = Math.min(maxHealth, playerHealth + statsSource.healthRegen);
+                    if (player) player.hp = playerHealth; // Keep component object in sync
+                    needsVisualRefresh = true;
+                    console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + playerHealth);
+                }
+            }
+
+            // --- ASTRAL ATTUNEMENT (MAGIC) ---
+            if (statsSource.magicRegen && statsSource.magicRegen > 0) {
+                if (playerMagic < maxMagic) {
+                    playerMagic = Math.min(maxMagic, playerMagic + statsSource.magicRegen);
+                    if (player) player.magic = playerMagic; // Keep component object in sync
+                    needsVisualRefresh = true;
+                    console.log("[PERK REGEN] Restored " + statsSource.magicRegen + " MAGIC. Current: " + playerMagic);
+                }
+            }
+
+            // Fire layout visual updates once if anything changed
+            if (needsVisualRefresh && typeof updateUI === "function") {
                 updateUI();
-                console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + player.hp);
             }
         }
     }

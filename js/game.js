@@ -105,21 +105,37 @@ function runPassiveRegeneration() {
     let statsSource = window.PlayerStats;
     if (!statsSource || !player || gameOver) return;
 
-    // Check if the player has unlocked any ranks in Celestial Vitality
-    if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+    // Check if either health or magic perks have active investments
+    if ((statsSource.healthRegen && statsSource.healthRegen > 0) || 
+        (statsSource.magicRegen && statsSource.magicRegen > 0)) {
+        
         passiveRegenTimer++;
 
-        // Syncs with your update ticks (approx 5 seconds based on your typical waitTime metrics)
+        // Syncs with your update ticks (300 frames)
         if (passiveRegenTimer >= 300) { 
             passiveRegenTimer = 0;
+            let needsVisualRefresh = false;
 
-            // Make sure player isn't dead and isn't already full health
-            let maxHp = statsSource.maxHealth || 100;
-            if (player.hp < maxHp) {
-                // Add flat health points matching the perk level/rank
-                player.hp = Math.min(maxHp, player.hp + statsSource.healthRegen);
-                
-                // Instantly sync the health tube fill bar on screen
+            // --- CELESTIAL VITALITY (HEALTH) ---
+            if (statsSource.healthRegen && statsSource.healthRegen > 0) {
+                let maxHp = statsSource.maxHealth || 100;
+                if (player.hp < maxHp) {
+                    player.hp = Math.min(maxHp, player.hp + statsSource.healthRegen);
+                    needsVisualRefresh = true;
+                }
+            }
+
+            // --- ASTRAL ATTUNEMENT (MAGIC) ---
+            if (statsSource.magicRegen && statsSource.magicRegen > 0) {
+                let maxMag = statsSource.maxMagic || 100;
+                if (player.magic < maxMag) {
+                    player.magic = Math.min(maxMag, player.magic + statsSource.magicRegen);
+                    needsVisualRefresh = true;
+                }
+            }
+
+            // Instantly sync the tube fill bars on screen if anything changed
+            if (needsVisualRefresh) {
                 updateUI();
             }
         }
