@@ -19,36 +19,47 @@ window.abilitySystem = {
         let ability = this.data[type];
         if (ability.charges > 0) {
             
-            // Check and deduct Health for Key 1
+            // Health Cost Check
             if (ability.costType === 'hp') {
+                // Cost is always deducted regardless of lifesteal unlock status
                 if (player && player.hp !== undefined && player.hp >= ability.costAmount) {
                     player.hp -= ability.costAmount;
+                    
+                    if (window.playerHealth !== undefined) {
+                        window.playerHealth = player.hp;
+                    }
+                    
+                    if (window.hasLifesteal) {
+                        console.log("Lifesteal weapon active HP deducted on launch");
+                    }
                 } else {
-                    console.log("Not enough health!");
+                    console.log("Not enough health");
                     return;
                 }
             }
 
-            // Check and deduct Magic for Key 2
+            // Magic Cost Check
             if (ability.costType === 'magic') {
                 if (player && player.magic !== undefined && player.magic >= ability.costAmount) {
                     player.magic -= ability.costAmount;
+                    
+                    if (window.playerMagic !== undefined) {
+                        window.playerMagic = player.magic;
+                    }
                 } else {
-                    console.log("Not enough magic!");
+                    console.log("Not enough magic");
                     return;
                 }
             }
 
-            // Deduct ability charge
             ability.charges--;
             
-            // Safe execution of your core shooting mechanics
             if (typeof executeProjectileLaunch === 'function') {
                 executeProjectileLaunch();
             }
 
             window.abilitySystem.updateUI(); 
-            this.debugText = `Used ${type}!`;
+            this.debugText = `Used ${type}`;
             setTimeout(() => { this.debugText = ""; }, 1000);
         }
     },
@@ -74,5 +85,4 @@ window.abilitySystem = {
     }
 };
 
-// Initialize the regen loop
 setInterval(() => window.abilitySystem.regen(), 10000);

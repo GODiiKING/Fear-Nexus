@@ -26,8 +26,10 @@ function startGame() {
 
         console.log("Keyboard activity detected: " + e.key);
         
+        // Inside your startGame keyboard event listener
         if (e.key === '1' || e.key === '2') {
-            console.log("Key captured in main loop:", e.key);
+            console.log("Key captured in main loop: " + e.key);
+
             if (window.abilitySystem) {
                 window.abilitySystem.handleKey(e.key);
             } else {
@@ -204,10 +206,9 @@ function updateGameArea() {
 
     updateUI(); 
     
-    // ==========================================
-    // RUN ACTIVE PERK PROCESSING UTILITIES
-    // ==========================================
+    // Run core passive abilities
     runPassiveRegeneration();
+    runStorePassiveUpgrades(); 
 
     if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
         ctx.fillStyle = "white";
@@ -245,8 +246,24 @@ function updateGameArea() {
 
     drawEnemyHealthBars(ctx);
 
+    // ==========================================
+    // UPGRADE SYSTEM INTERCEPTORS: REVIVAL CHECK
+    // ==========================================
     if (player && player.hp <= 0 && !gameOver) {
-        endGame();
+        if (window.hasRevival) {
+            window.hasRevival = false; 
+            
+            let maxHpRef = player.maxHp || window.maxHealth || 100;
+            player.hp = Math.floor(maxHpRef * 0.5); 
+            
+            if (window.playerHealth !== undefined) {
+                window.playerHealth = player.hp;
+            }
+            
+            console.log("Revival triggered! Safety barrier shattered.");
+        } else {
+            endGame();
+        }
     }
 
     if (gameOver) {
@@ -330,42 +347,112 @@ function runPassiveRegeneration() {
     let statsSource = window.PlayerStats;
     if (!statsSource || gameOver) return;
 
-    // Tick the clock if either regeneration perk has active investments
     if ((statsSource.healthRegen && statsSource.healthRegen > 0) || 
         (statsSource.magicRegen && statsSource.magicRegen > 0)) {
         
         passiveRegenTimer++;
 
-        // At 20ms ticks, 250 frames equals exactly a 5-second interval loop
         if (passiveRegenTimer >= 250) { 
             passiveRegenTimer = 0;
 
             let needsVisualRefresh = false;
 
-            // --- CELESTIAL VITALITY (HEALTH) ---
+            // Celestial Vitality (Health)
             if (statsSource.healthRegen && statsSource.healthRegen > 0) {
                 if (playerHealth < maxHealth) {
                     playerHealth = Math.min(maxHealth, playerHealth + statsSource.healthRegen);
-                    if (player) player.hp = playerHealth; // Keep component object in sync
+                    if (player) player.hp = playerHealth; 
                     needsVisualRefresh = true;
                     console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + playerHealth);
                 }
             }
 
-            // --- ASTRAL ATTUNEMENT (MAGIC) ---
+            // Astral Attunement (Magic)
             if (statsSource.magicRegen && statsSource.magicRegen > 0) {
                 if (playerMagic < maxMagic) {
                     playerMagic = Math.min(maxMagic, playerMagic + statsSource.magicRegen);
-                    if (player) player.magic = playerMagic; // Keep component object in sync
+                    if (player) player.magic = playerMagic; 
                     needsVisualRefresh = true;
                     console.log("[PERK REGEN] Restored " + statsSource.magicRegen + " MAGIC. Current: " + playerMagic);
                 }
             }
 
-            // Fire layout visual updates once if anything changed
             if (needsVisualRefresh && typeof updateUI === "function") {
                 updateUI();
             }
         }
+    }
+}
+
+function runStorePassiveUpgrades() {
+    if (!player || gameOver) return;
+
+    // Sanguine Aura processing
+    if (window.hasSanguineAura && enemies.length > 0) {
+        if (!window.auraTimer) window.auraTimer = 0;
+        window.auraTimer++;
+
+        if (window.auraTimer >= 15) {
+            window.auraTimer = 0;
+            
+            let auraRadius = 160;
+            let auraDamage = 1;
+
+            for (let i = 0; i < enemies.length; i++) {
+                let enemy = enemies[i];
+                let dx = enemy.x - player.x;
+                let dy = enemy.y - player.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < auraRadius) {
+                    enemy.hp -= auraDamage;
+                    enemy.lastHitTime = Date.now();
+
+                    let maxHpRef = player.maxHp || window.maxHealth || 100;
+                    player.hp = Math.min(maxHpRef, player.hp + 0.2);
+                    if (window.playerHealth !== undefined) window.playerHealth = player.hp;
+
+                    if (enemy.hp <= 0) {
+                        let isBoss = (enemy.hasOwnProperty('isBoss') && enemy.isBoss);
+                        score += isBoss ? 10 : 1;
+
+                        if (window.PlayerStats) {
+                            window.PlayerStats.addXP(isBoss ? 25 : 5);
+                            window.PlayerStats.addSouls(isBoss ? 100 : 50);
+                        }
+
+                        enemies.splice(i, 1);
+                        enemiesWaitTime.splice(i, 1);
+                        enemiesAnimationPosition.splice(i, 1);
+                        enemiesPlayerCollision.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+        }
+    }
+
+    // Mana Zone processing
+    if (window.hasManaZone) {
+        if (window.lastTrackedX === undefined) {
+            window.lastTrackedX = player.x;
+            window.lastTrackedY = player.y;
+            window.stillFramesCounter = 0;
+        }
+
+        if (player.x === window.lastTrackedX && player.y === window.lastTrackedY) {
+            window.stillFramesCounter++;
+            
+            if (window.stillFramesCounter >= 30) {
+                let maxMagicRef = player.maxMagic || window.maxMagic || 100;
+                player.magic = Math.min(maxMagicRef, player.magic + 0.4);
+                if (window.playerMagic !== undefined) window.playerMagic = player.magic;
+            }
+        } else {
+            window.stillFramesCounter = 0;
+        }
+
+        window.lastTrackedX = player.x;
+        window.lastTrackedY = player.y;
     }
 }

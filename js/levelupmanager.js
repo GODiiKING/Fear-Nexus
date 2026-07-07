@@ -239,6 +239,38 @@ window.LevelUpManager = {
 // TEMPORARY RUN UPGRADE STORE MANAGER (🏪)
 // ==========================================
 window.UpgradeManager = {
+    // Define the specific gating data for each mod
+    upgrades: {
+        lifesteal: {
+            requirement: () => !!(window.PlayerStats && window.PlayerStats.healthKills >= 2),
+            apply: () => { window.hasLifesteal = true; console.log("Lifesteal unlocked"); }
+        },
+        manasteal: {
+            requirement: () => !!(window.PlayerStats && window.PlayerStats.magicKills >= 2),
+            apply: () => { window.hasManasteal = true; console.log("Manasteal unlocked"); }
+        },
+        revival: {
+            requirement: () => !!(window.RoundManager && window.RoundManager.round >= 1),
+            apply: () => { window.hasRevival = true; console.log("Revival safety shield ready"); }
+        },
+        sanguineAura: {
+            requirement: () => !!window.hasLifesteal,
+            apply: () => { window.hasSanguineAura = true; console.log("Sanguine Aura passive activated"); }
+        },
+        manaZone: {
+            requirement: () => !!window.hasManasteal,
+            apply: () => { window.hasManaZone = true; console.log("Mana Zone field presence activated"); }
+        },
+        astra: {
+            requirement: () => !!(window.RoundManager && window.RoundManager.round >= 2),
+            apply: () => { window.hasAstra = true; console.log("Astra cosmic alignment unlocked"); }
+        },
+        asmodeus: {
+            requirement: () => !!(window.PlayerStats && window.PlayerStats.kills >= 10),
+            apply: () => { window.hasAsmodeus = true; console.log("Asmodeus pact initialized"); }
+        }
+    },
+
     open() {
         const panel = document.getElementById("upgrade-panel");
         if (panel) panel.classList.remove("hidden");
@@ -262,7 +294,20 @@ window.UpgradeManager = {
 
     selectUpgrade(upgradeType) {
         console.log(`Selected upgrade modifier: ${upgradeType}`);
-        this.close();
+        const upgrade = this.upgrades[upgradeType];
+        
+        if (!upgrade) {
+            this.close();
+            return;
+        }
+
+        // Validate the tracking variables before executing the unlock
+        if (upgrade.requirement()) {
+            upgrade.apply();
+            this.close();
+        } else {
+            console.log("Unlock prerequisites not achieved yet");
+        }
     },
 
     close() {

@@ -1,13 +1,13 @@
+"use strict";
+
 window.UpgradeManager = {
     unlocked: {},
     upgrades: {
         lifesteal: {
             id: "lifesteal",
             requirement: () => {
-                if (window.PlayerStats && window.PlayerStats.healthKills !== undefined) {
-                    return window.PlayerStats.healthKills >= 2;
-                }
-                return true;
+                // Safeguard against undefined stats: evaluates true only if kills are 2 or more
+                return !!(window.PlayerStats && window.PlayerStats.healthKills >= 2);
             },
             apply: () => { 
                 window.hasLifesteal = true; 
@@ -17,10 +17,7 @@ window.UpgradeManager = {
         manasteal: {
             id: "manasteal",
             requirement: () => {
-                if (window.PlayerStats && window.PlayerStats.magicKills !== undefined) {
-                    return window.PlayerStats.magicKills >= 2;
-                }
-                return true;
+                return !!(window.PlayerStats && window.PlayerStats.magicKills >= 2);
             },
             apply: () => { 
                 window.hasManasteal = true; 
@@ -30,20 +27,58 @@ window.UpgradeManager = {
         revival: {
             id: "revival",
             requirement: () => {
-                if (window.RoundManager && window.RoundManager.round !== undefined) {
-                    return window.RoundManager.round >= 1;
-                }
-                return true;
+                return !!(window.RoundManager && window.RoundManager.round >= 1);
             },
             apply: () => { 
                 window.hasRevival = true; 
                 console.log("Revival safety shield ready");
             }
+        },
+        sanguineAura: {
+            id: "sanguineAura",
+            requirement: () => {
+                // Requires lifesteal to be active first
+                return !!window.hasLifesteal;
+            },
+            apply: () => {
+                window.hasSanguineAura = true;
+                console.log("Sanguine Aura passive activated");
+            }
+        },
+        manaZone: {
+            id: "manaZone",
+            requirement: () => {
+                // Requires manasteal to be active first
+                return !!window.hasManasteal;
+            },
+            apply: () => {
+                window.hasManaZone = true;
+                console.log("Mana Zone field presence activated");
+            }
+        },
+        astra: {
+            id: "astra",
+            requirement: () => {
+                return !!(window.RoundManager && window.RoundManager.round >= 2);
+            },
+            apply: () => {
+                window.hasAstra = true;
+                console.log("Astra cosmic alignment unlocked");
+            }
+        },
+        asmodeus: {
+            id: "asmodeus",
+            requirement: () => {
+                return !!(window.PlayerStats && window.PlayerStats.kills >= 10);
+            },
+            apply: () => {
+                window.hasAsmodeus = true;
+                console.log("Asmodeus pact initialized");
+            }
         }
     },
 
     toggleStore() {
-        // Checks both potential element IDs to ensure a match with your HTML layout
         const panel = document.getElementById("upgrade-panel") || document.getElementById("upgrade-store");
         
         if (!panel) {
@@ -53,9 +88,8 @@ window.UpgradeManager = {
 
         panel.classList.toggle("hidden");
 
-        // Force system display properties if the CSS classes are overridden
         if (panel.classList.contains("hidden")) {
-            panel.style.display = "none";
+            panel.style.display = "none"; // Fixed the double style typo here
         } else {
             panel.style.display = "block";
             if (typeof this.updateStoreUI === "function") {
@@ -111,39 +145,6 @@ window.LevelUpManager = {
     }
 };
 
-window.LevelUpManager = {
-    chooseHealth() {
-        if (window.player) {
-            if (window.player.maxHp === undefined) {
-                window.player.maxHp = 100;
-            }
-            window.player.maxHp += 20;
-            window.player.hp = window.player.maxHp;
-            console.log("Vitality expanded to " + window.player.maxHp);
-        }
-        this.dismissPanel();
-    },
-
-    chooseMagic() {
-        if (window.player) {
-            if (window.player.maxMagic === undefined) {
-                window.player.maxMagic = 100;
-            }
-            window.player.maxMagic += 20;
-            window.player.magic = window.player.maxMagic;
-            console.log("Arcane reservoir expanded to " + window.player.maxMagic);
-        }
-        this.dismissPanel();
-    },
-
-    dismissPanel() {
-        const panel = document.getElementById("levelup-panel");
-        if (panel) {
-            panel.classList.add("hidden");
-        }
-    }
-};
-
 window.PerkStoreManager = {
     open() {
         const panel = document.getElementById("perk_store_panel");
@@ -192,5 +193,9 @@ window.PerkStoreManager = {
     }
 };
 
-// Route the Z key upgrade manager directly to the Perk Store
-window.UpgradeManager = window.PerkStoreManager;
+// Initialize the regen loop
+setInterval(() => {
+    if (window.abilitySystem && typeof window.abilitySystem.regen === "function") {
+        window.abilitySystem.regen();
+    }
+}, 10000);

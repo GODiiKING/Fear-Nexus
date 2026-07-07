@@ -54,14 +54,13 @@ function checkBulletCollisions() {
                 bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
 
             if (isHitX && isHitY) {
-                // ASYNC AUDIO FIX: Catching audio promises avoids console abort errors
                 if (shootSound) {
                     try {
                         shootSound.pause();
                         shootSound.currentTime = 0;
                         let playPromise = shootSound.play();
                         if (playPromise !== undefined) {
-                            playPromise.catch(() => { /* Safe suppression of overlapping audio interrupts */ });
+                            playPromise.catch(() => {});
                         }
                     } catch (audioError) {}
                 }
@@ -86,27 +85,78 @@ function checkBulletCollisions() {
                     }
                 }
 
+                // Apply base attack damage
                 enemies[i].hp -= 1;
                 enemies[i].lastHitTime = Date.now();
 
-                if (enemies[i].hp <= 0) {
-                    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
-                    score += isBoss ? 10 : 1;
+                // ==========================================
+// UPGRADE SYSTEM INTERCEPTORS: HIT EFFECTS
+// ==========================================
 
-                    if (window.PlayerStats) {
-                        let xpGained = isBoss ? 25 : 5;
-                        let soulsGained = isBoss ? 100 : 50;
-                        
-                        window.PlayerStats.addXP(xpGained);
-                        window.PlayerStats.addSouls(soulsGained);
-                    }
+// Process Lifesteal Upgrade: Only heals when bullet successfully registers a hit
+if (window.hasLifesteal && player) {
+    let maxHpRef = player.maxHp || window.maxHealth || 100;
+    let healAmount = 5; // Balanced heal amount per hit
+    
+    player.hp = Math.min(maxHpRef, player.hp + healAmount);
+    if (window.playerHealth !== undefined) {
+        window.playerHealth = player.hp;
+    }
+    console.log("Lifesteal success Enemy hit Restored " + healAmount + " HP");
+}
 
-                    enemies.splice(i, 1);
-                    enemiesWaitTime.splice(i, 1);
-                    enemiesAnimationPosition.splice(i, 1);
-                    enemiesPlayerCollision.splice(i, 1);
-                    i--;
-                }
+// Process Manasteal Upgrade
+if (window.hasManasteal && player) {
+    let maxMagicRef = player.maxMagic || window.maxMagic || 100;
+    player.magic = Math.min(maxMagicRef, player.magic + 2);
+    if (window.playerMagic !== undefined) {
+        window.playerMagic = player.magic;
+    }
+    console.log("Manasteal active: Restored 2 Magic");
+}
+
+                // Place this inside your checkBulletCollisions loop where bullet hits enemy
+if (window.hasLifesteal) {
+    let maxHpRef = player.maxHp || window.maxHealth || 100;
+    
+    // Choose how much health you recover per hit registered
+    let healAmount = 5; 
+    
+    player.hp = Math.min(maxHpRef, player.hp + healAmount);
+    
+    if (window.playerHealth !== undefined) {
+        window.playerHealth = player.hp;
+    }
+    
+    console.log("Lifesteal success Enemy hit Restored " + healAmount + " HP");
+}
+
+                // Check for enemy elimination inside checkBulletCollisions
+            if (enemies[i].hp <= 0) {
+        let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
+        score += isBoss ? 10 : 1;
+
+        if (window.PlayerStats) {
+            let xpGained = isBoss ? 25 : 5;
+            let soulsGained = isBoss ? 100 : 50;
+            
+            window.PlayerStats.addXP(xpGained);
+            window.PlayerStats.addSouls(soulsGained);
+
+            // Track the kill count for the lifesteal unlock condition
+            if (window.PlayerStats.healthKills === undefined) {
+                window.PlayerStats.healthKills = 0;
+            }
+            window.PlayerStats.healthKills += 1; 
+            console.log("Kills tracked for store: " + window.PlayerStats.healthKills);
+        }
+
+        enemies.splice(i, 1);
+        enemiesWaitTime.splice(i, 1);
+        enemiesAnimationPosition.splice(i, 1);
+        enemiesPlayerCollision.splice(i, 1);
+        i--;
+    }
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
