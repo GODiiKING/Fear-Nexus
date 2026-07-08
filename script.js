@@ -202,8 +202,6 @@ function updateGameArea() {
 
     let ctx = GameArea.context;
 
-    ctx.fillText(score.toString(), 640, 60);
-
     updateUI(); 
     
     // Run core passive abilities
@@ -235,6 +233,7 @@ function updateGameArea() {
     checkEnemyPlayerCollisions();
     moveEnemies();
 
+    // 1. Draw Environment and Entities first (Bottom layers)
     grassArray.forEach(grass => grass.update());
     player.update();
     bullets.forEach(bullet => bullet.update());
@@ -245,6 +244,27 @@ function updateGameArea() {
     }
 
     drawEnemyHealthBars(ctx);
+
+    // ==========================================
+    // CENTRAL HUD VISUAL PROGRESSION LAYOUT (Top layer)
+    // ==========================================
+    ctx.textAlign = "center"; 
+
+    // Draw Dynamic Round Progression Info cleanly in the center (Red trackers removed)
+    if (window.RoundManager) {
+        let currentRound = window.RoundManager.round;
+        let req = window.RoundManager.roundRequirements[currentRound];
+        
+        ctx.fillStyle = "#ff0000"; 
+        ctx.font = "bold 20px Arial"; 
+
+        if (req === "boss") {
+            ctx.fillText("ROUND " + currentRound + " - BOSS STAGE ENCOUNTER", 640, 60);
+        } else {
+            let kills = window.RoundManager.killsThisRound;
+            ctx.fillText("ROUND " + currentRound + " • PROGRESS: " + kills + " / " + req + " KILLS", 640, 60);
+        }
+    }
 
     // ==========================================
     // UPGRADE SYSTEM INTERCEPTORS: REVIVAL CHECK
@@ -268,6 +288,7 @@ function updateGameArea() {
 
     if (gameOver) {
         restartScreen.update();
+        ctx.fillStyle = "#ffffff"; 
         ctx.fillText(
             "High Score: " + highscore.toString(),
             640,

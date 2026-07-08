@@ -30,18 +30,6 @@ function Component(width, height, source, x, y, type, angle = 0) {
     this.update = function() {
         const ctx = GameArea.context;
 
-        if (gameOver === false) {
-            ctx.font = "50px Comic Sans MS";
-            ctx.fillStyle = "red";
-            ctx.textAlign = "center";
-            ctx.fillText(score.toString(), 640, 100);
-        } else {
-            ctx.font = "60px Comic Sans MS";
-            ctx.fillStyle = "red";
-            ctx.textAlign = "center";
-            ctx.fillText("High Score: " + highscore.toString(), 640, 700);
-        }
-
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
         ctx.rotate(this.angle);

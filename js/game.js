@@ -70,10 +70,23 @@ function updateUI() {
     if (magicFill) magicFill.style.width = magicPercentage + '%';
     if (magicText) magicText.innerText = currentMagic + '/' + maxMagic;
 
-    // 3. Update Level/XP Tracker Text Display
+    // 3. Update Level/XP & Round Tracker Text Display
     let xpText = document.getElementById('xp-text');
     if (xpText) {
         xpText.innerText = "Level " + (statsSource.level || 1);
+    }
+
+    // NEW: Dynamic round tracker update loop logic
+    let roundText = document.getElementById('round-text');
+    if (roundText && window.RoundManager) {
+        let currentRound = window.RoundManager.round;
+        let req = window.RoundManager.roundRequirements[currentRound];
+        
+        if (req === "boss") {
+            roundText.innerText = "ROUND " + currentRound + " (BOSS STAGE)";
+        } else {
+            roundText.innerText = "ROUND " + currentRound + " (" + window.RoundManager.killsThisRound + "/" + req + " Kills)";
+        }
     }
 
     // 4. Update Soul Tracker HUD Count Display
