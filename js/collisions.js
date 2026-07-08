@@ -90,73 +90,65 @@ function checkBulletCollisions() {
                 enemies[i].lastHitTime = Date.now();
 
                 // ==========================================
-// UPGRADE SYSTEM INTERCEPTORS: HIT EFFECTS
-// ==========================================
+                // ON-HIT EFFECTS (LIFESTEAL & MANASTEAL)
+                // ==========================================
 
-// Process Lifesteal Upgrade: Only heals when bullet successfully registers a hit
-if (window.hasLifesteal && player) {
-    let maxHpRef = player.maxHp || window.maxHealth || 100;
-    let healAmount = 5; // Balanced heal amount per hit
-    
-    player.hp = Math.min(maxHpRef, player.hp + healAmount);
-    if (window.playerHealth !== undefined) {
-        window.playerHealth = player.hp;
-    }
-    console.log("Lifesteal success Enemy hit Restored " + healAmount + " HP");
-}
+                // Process Lifesteal
+                if (window.hasLifesteal && player) {
+                    let maxHpRef = player.maxHp || window.maxHealth || 100;
+                    let healAmount = 5; 
+                    player.hp = Math.min(maxHpRef, player.hp + healAmount);
+                    if (window.playerHealth !== undefined) {
+                        window.playerHealth = player.hp;
+                    }
+                    console.log("Lifesteal success: Restored " + healAmount + " HP");
+                }
 
-// Process Manasteal Upgrade
-if (window.hasManasteal && player) {
-    let maxMagicRef = player.maxMagic || window.maxMagic || 100;
-    player.magic = Math.min(maxMagicRef, player.magic + 2);
-    if (window.playerMagic !== undefined) {
-        window.playerMagic = player.magic;
-    }
-    console.log("Manasteal active: Restored 2 Magic");
-}
+                // Process Manasteal (Mirrors lifesteal perfectly)
+                if (window.hasManasteal && player) {
+                    let maxMagicRef = player.maxMagic || window.maxMagic || 100;
+                    let manaRestoreAmount = 5; 
+                    player.magic = Math.min(maxMagicRef, player.magic + manaRestoreAmount);
+                    if (window.playerMagic !== undefined) {
+                        window.playerMagic = player.magic;
+                    }
+                    console.log("Manasteal success: Restored " + manaRestoreAmount + " Magic");
+                }
 
-                // Place this inside your checkBulletCollisions loop where bullet hits enemy
-if (window.hasLifesteal) {
-    let maxHpRef = player.maxHp || window.maxHealth || 100;
-    
-    // Choose how much health you recover per hit registered
-    let healAmount = 5; 
-    
-    player.hp = Math.min(maxHpRef, player.hp + healAmount);
-    
-    if (window.playerHealth !== undefined) {
-        window.playerHealth = player.hp;
-    }
-    
-    console.log("Lifesteal success Enemy hit Restored " + healAmount + " HP");
-}
+                // ==========================================
+                // ENEMY ELIMINATION & STORE KILL TRACKING
+                // ==========================================
+                if (enemies[i].hp <= 0) {
+                    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
+                    score += isBoss ? 10 : 1;
 
-                // Check for enemy elimination inside checkBulletCollisions
-            if (enemies[i].hp <= 0) {
-        let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
-        score += isBoss ? 10 : 1;
+                    if (window.PlayerStats) {
+                        let xpGained = isBoss ? 25 : 5;
+                        let soulsGained = isBoss ? 100 : 50;
+                        
+                        window.PlayerStats.addXP(xpGained);
+                        window.PlayerStats.addSouls(soulsGained);
 
-        if (window.PlayerStats) {
-            let xpGained = isBoss ? 25 : 5;
-            let soulsGained = isBoss ? 100 : 50;
-            
-            window.PlayerStats.addXP(xpGained);
-            window.PlayerStats.addSouls(soulsGained);
+                        // Ensure both tracking variables exist
+                        if (window.PlayerStats.healthKills === undefined) {
+                            window.PlayerStats.healthKills = 0;
+                        }
+                        if (window.PlayerStats.magicKills === undefined) {
+                            window.PlayerStats.magicKills = 0;
+                        }
+                        
+                        // Both increment identically so upgrades unlock smoothly
+                        window.PlayerStats.healthKills += 1; 
+                        window.PlayerStats.magicKills += 1; 
+                        console.log(`Kills tracked - Health: ${window.PlayerStats.healthKills}, Magic: ${window.PlayerStats.magicKills}`);
+                    }
 
-            // Track the kill count for the lifesteal unlock condition
-            if (window.PlayerStats.healthKills === undefined) {
-                window.PlayerStats.healthKills = 0;
-            }
-            window.PlayerStats.healthKills += 1; 
-            console.log("Kills tracked for store: " + window.PlayerStats.healthKills);
-        }
-
-        enemies.splice(i, 1);
-        enemiesWaitTime.splice(i, 1);
-        enemiesAnimationPosition.splice(i, 1);
-        enemiesPlayerCollision.splice(i, 1);
-        i--;
-    }
+                    enemies.splice(i, 1);
+                    enemiesWaitTime.splice(i, 1);
+                    enemiesAnimationPosition.splice(i, 1);
+                    enemiesPlayerCollision.splice(i, 1);
+                    i--;
+                }
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
