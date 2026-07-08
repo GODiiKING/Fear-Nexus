@@ -261,10 +261,11 @@ canvas {
 
 .interface {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 25px;
+    /* Changed minmax from 200px to 170px to naturally fit more columns dynamically */
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
+    gap: 16px; /* Reduced from 25px to save space */
     width: 100%;
-    max-width: 720px;
+    max-width: 800px; /* Expanded slightly from 720px to utilize canvas width better */
     justify-content: center;
     justify-items: center;
 }
@@ -272,10 +273,10 @@ canvas {
 .reward-card {
     background-color: #030336;
     border: 2px solid #ff6b9d;
-    border-radius: 12px;
-    padding: 15px 10px;
-    max-width: 220px;
-    min-width: 120px;
+    border-radius: 10px;
+    padding: 10px 8px; /* Tighter internal padding */
+    max-width: 180px;  /* Reduced from 220px to keep them minimal */
+    min-width: 140px;
     text-align: center;
     cursor: pointer;
     position: relative;
@@ -283,20 +284,20 @@ canvas {
 }
 
 .reward-card:hover {
-    transform: scale(1.06) translateY(-6px);
-    box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+    transform: scale(1.05) translateY(-4px);
+    box-shadow: 0 0 15px rgba(255, 107, 157, 0.4);
 }
 
 .reward-title {
     font-family: 'Acme', sans-serif;
     color: #ffc048;
-    font-size: 1.6rem;
-    margin: 0 0 12px 0;
+    font-size: 1.25rem; /* Reduced from 1.6rem to prevent text wrapping headers */
+    margin: 0 0 6px 0;  /* Closer spacing */
 }
 
 .reward-desc {
-    font-size: 0.78rem;
-    line-height: 1.4;
+    font-size: 0.72rem; /* Slightly smaller body text for easier reading */
+    line-height: 1.3;
     color: #ffffff;
     margin: 0;
     opacity: 0.9;
