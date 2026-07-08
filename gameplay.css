@@ -274,8 +274,8 @@ canvas {
 }
 
 .reward-card {
-    background-color: #030336;
-    border: 2px solid #ff6b9d;
+    background-color: #06060e;
+    border: 2px solid #291f22;
     border-radius: 10px;
     padding: 10px 8px; /* Tighter internal padding */
     max-width: 180px;  /* Reduced from 220px to keep them minimal */
