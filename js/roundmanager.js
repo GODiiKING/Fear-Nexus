@@ -43,15 +43,19 @@ window.RoundManager = {
         // Reset global boss spawn tracking flag so the next boss stage functions correctly
         window.bossSpawnedThisRound = false;
 
+        // TEMPORARY TESTING CHANGE: Set to 2 instead of 10
         if (this.round >= 10) {
-            console.log("VICTORY! You have completed all 10 rounds!");
-            alert("Victory! You have cleared Fear Nexus!");
+            console.log("VICTORY! You have completed the testing rounds!");
+            
+            // Remove the hidden class to reveal the customized visual victory layout
+            const victoryPanel = document.getElementById("victory-panel");
+            if (victoryPanel) {
+                victoryPanel.classList.remove("hidden");
+            }
             return;
         }
 
         this.round++;
-        
-        // AUTOMATIC UPGRADE STORE OPENING REMOVED FROM HERE
     },
 
     // Centralized Difficulty Scaling System
