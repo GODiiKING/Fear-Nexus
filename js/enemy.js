@@ -14,6 +14,9 @@ let maxTime = 5000;
 let minTime = 100;
 let killCount = 0;
 
+// Track if a boss has already entered the screen during the current stage
+window.bossSpawnedThisRound = false;
+
 // ==========================================
 // ENEMY LOGIC & SPAWNING
 // ==========================================
@@ -23,34 +26,41 @@ function spawnEnemy() {
     // 1. CAP THE SPAWNS: Stop if we have too many enemies
     if (enemies.length >= MAX_ENEMIES) return;
 
-    killCount++;
-
-    // 2. BOSS LOGIC: Trigger every 10th enemy
-    if (killCount % 10 === 0) {
-        let bossWidth = 400 * imagesScale;
-        let bossHeight = 400 * imagesScale;
+    // 2. PROGRESSION SPAWN LOGIC: Query the global RoundManager setup
+    if (window.RoundManager && window.RoundManager.isBossRound()) {
         
-        // Spawn off-screen to the right (x: 1280 + bossWidth)
-        // This ensures the boss walks in instead of appearing on the player
-        let boss = new Component(
-            bossWidth, 
-            bossHeight, 
-            "images/boss/demon-lord.png", 
-            1280 + bossWidth, 
-            360 - (bossHeight / 2), 
-            "image"
-        );
+        // Only spawn the boss if one isn't already alive on screen
+        if (!window.bossSpawnedThisRound) {
+            let bossWidth = 400 * imagesScale;
+            let bossHeight = 400 * imagesScale;
+            
+            let boss = new Component(
+                bossWidth, 
+                bossHeight, 
+                "images/boss/demon-lord.png", 
+                1280 + bossWidth, 
+                360 - (bossHeight / 2), 
+                "image"
+            );
+            
+            // Pull clean difficulty calculations straight from our manager
+            boss.maxHp = window.RoundManager.getBossMaxHP(); 
+            boss.hp = boss.maxHp;
+            boss.isBoss = true;
+            
+            enemies.push(boss);
+            enemiesWaitTime.push(5);
+            enemiesAnimationPosition.push(0);
+            enemiesPlayerCollision.push(true);
+            
+            window.bossSpawnedThisRound = true;
+            console.log("BOSS SPAWNED VIA ROUND MANAGER!");
+        }
         
-        boss.maxHp = 50 + (killCount); 
-        boss.hp = boss.maxHp;
-        boss.isBoss = true;
-        
-        enemies.push(boss);
-        enemiesWaitTime.push(5);
-        enemiesAnimationPosition.push(0);
-        enemiesPlayerCollision.push(true);
-        console.log("BOSS SPAWNED OFF-SCREEN!");
+        // Stop execution here during a boss round so standard grunts don't distract your test
+        return;
     } 
+    
     // 3. REGULAR ENEMY LOGIC
     else {
         let eW = 288 * imagesScale;
@@ -64,8 +74,14 @@ function spawnEnemy() {
         else if (randomPosition === 3) { newEnemy.x = Math.random() * 1280 - eW / 2; newEnemy.y = 720 - eH / 2; }
         else if (randomPosition === 4) { newEnemy.x = Math.random() * 1280 - eW / 2; newEnemy.y = -eH / 2; }
 
-        let currentKills = typeof score !== 'undefined' ? score : 0; 
-        newEnemy.maxHp = 2 + Math.floor(currentKills / 10);
+        // Pull standard health scaling rules from our RoundManager calculations
+        if (window.RoundManager) {
+            newEnemy.maxHp = window.RoundManager.getEnemyMaxHP();
+        } else {
+            let currentKills = typeof score !== 'undefined' ? score : 0; 
+            newEnemy.maxHp = 2 + Math.floor(currentKills / 10);
+        }
+        
         newEnemy.hp = newEnemy.maxHp;   
         newEnemy.lastHitTime = 0; 
 
@@ -92,12 +108,11 @@ for (let i = 0; i < 8; i++) {
 }
 
 function getRandomInterval() {
-    // 1. Reduce the times to make it faster
+    // Reduce the times to make it faster
     maxTime -= maxTime * difficulty;
     minTime -= minTime * difficulty;
 
-    // 2. SAFETY FLOOR: Ensure the wait time never drops below a playable speed
-    // This stops it from becoming 0 or negative
+    // SAFETY FLOOR: Ensure the wait time never drops below a playable speed
     const MIN_LIMIT = 200; 
     if (maxTime < MIN_LIMIT) maxTime = MIN_LIMIT;
     if (minTime < 50) minTime = 50;

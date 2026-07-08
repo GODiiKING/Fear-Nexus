@@ -116,39 +116,43 @@ function checkBulletCollisions() {
                 }
 
                 // ==========================================
-                // ENEMY ELIMINATION & STORE KILL TRACKING
-                // ==========================================
-                if (enemies[i].hp <= 0) {
-                    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
-                    score += isBoss ? 10 : 1;
+// ENEMY ELIMINATION & STORE KILL TRACKING
+// ==========================================
+if (enemies[i].hp <= 0) {
+    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
+    score += isBoss ? 10 : 1;
 
-                    if (window.PlayerStats) {
-                        let xpGained = isBoss ? 25 : 5;
-                        let soulsGained = isBoss ? 100 : 50;
-                        
-                        window.PlayerStats.addXP(xpGained);
-                        window.PlayerStats.addSouls(soulsGained);
+    if (window.PlayerStats) {
+        let xpGained = isBoss ? 25 : 5;
+        let soulsGained = isBoss ? 100 : 50;
+        
+        window.PlayerStats.addXP(xpGained);
+        window.PlayerStats.addSouls(soulsGained);
 
-                        // Ensure both tracking variables exist
-                        if (window.PlayerStats.healthKills === undefined) {
-                            window.PlayerStats.healthKills = 0;
-                        }
-                        if (window.PlayerStats.magicKills === undefined) {
-                            window.PlayerStats.magicKills = 0;
-                        }
-                        
-                        // Both increment identically so upgrades unlock smoothly
-                        window.PlayerStats.healthKills += 1; 
-                        window.PlayerStats.magicKills += 1; 
-                        console.log(`Kills tracked - Health: ${window.PlayerStats.healthKills}, Magic: ${window.PlayerStats.magicKills}`);
-                    }
+        if (window.PlayerStats.healthKills === undefined) {
+            window.PlayerStats.healthKills = 0;
+        }
+        if (window.PlayerStats.magicKills === undefined) {
+            window.PlayerStats.magicKills = 0;
+        }
+        
+        window.PlayerStats.healthKills += 1; 
+        window.PlayerStats.magicKills += 1; 
+        console.log(`Kills tracked - Health: ${window.PlayerStats.healthKills}, Magic: ${window.PlayerStats.magicKills}`);
+    }
 
-                    enemies.splice(i, 1);
-                    enemiesWaitTime.splice(i, 1);
-                    enemiesAnimationPosition.splice(i, 1);
-                    enemiesPlayerCollision.splice(i, 1);
-                    i--;
-                }
+    // NEW PROGRESSION HOOK: Send death signal straight to our RoundManager!
+    if (window.RoundManager) {
+        window.RoundManager.registerKill(isBoss);
+    }
+
+    // Existing clean up splicing code remains untouched
+    enemies.splice(i, 1);
+    enemiesWaitTime.splice(i, 1);
+    enemiesAnimationPosition.splice(i, 1);
+    enemiesPlayerCollision.splice(i, 1);
+    i--;
+}
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
