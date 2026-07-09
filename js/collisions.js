@@ -6,6 +6,11 @@
 
 function updateBullets() {
 
+    // Stop bullets completely during story or when dead
+    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+        return;
+    }
+
     if (bulletActive) {
 
         let bullet1Turn = ((Math.random()) * 3) * Math.PI / 180;
@@ -21,16 +26,7 @@ function updateBullets() {
         bullet3.x += bulletSpeed * Math.cos(bulletAngle + bullet3Turn);
         bullet3.y += bulletSpeed * Math.sin(bulletAngle + bullet3Turn);
 
-        if (bullet1.x > 1280) {
-            canShoot = true;
-        }
-        else if (bullet1.x < 0) {
-            canShoot = true;
-        }
-        else if (bullet1.y < 0) {
-            canShoot = true;
-        }
-        else if (bullet1.y > 720) {
+        if (bullet1.x > 1280 || bullet1.x < 0 || bullet1.y < 0 || bullet1.y > 720) {
             canShoot = true;
         }
     }
@@ -40,6 +36,12 @@ function updateBullets() {
 // BULLET HIT DETECTION (STABILITY PATCH)
 // ==========================================
 function checkBulletCollisions() {
+
+    // Stop bullet hits during story or when dead
+    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+        return;
+    }
+
     for (let j = 0; j < bullets.length; j++) {
         for (let i = 0; i < enemies.length; i++) {
             
@@ -54,24 +56,20 @@ function checkBulletCollisions() {
                 bullets[j].y < enemies[i].y + (77 + 197) * imagesScale;
 
             if (isHitX && isHitY) {
+
+                // Sounds
                 if (shootSound) {
                     try {
                         shootSound.pause();
                         shootSound.currentTime = 0;
-                        let playPromise = shootSound.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(() => {});
-                        }
+                        shootSound.play().catch(() => {});
                     } catch (audioError) {}
                 }
 
                 if (alienDeathSound) {
                     alienDeathSound.volume = 0.9;
                     if (alienDeathSound.paused) {
-                        let deathPromise = alienDeathSound.play();
-                        if (deathPromise !== undefined) {
-                            deathPromise.catch(() => {});
-                        }
+                        alienDeathSound.play().catch(() => {});
                     }
                 }
 
@@ -79,84 +77,55 @@ function checkBulletCollisions() {
                 let soundToPlay = randomSpeak < 0.33 ? alienSpeakSound : (randomSpeak < 0.66 ? alienSpeakSound2 : alienSpeakSound3);
                 if (soundToPlay) {
                     soundToPlay.volume = 0.9;
-                    let speakPromise = soundToPlay.play();
-                    if (speakPromise !== undefined) {
-                        speakPromise.catch(() => {});
-                    }
+                    soundToPlay.play().catch(() => {});
                 }
 
-                // Apply base attack damage
+                // Damage enemy
                 enemies[i].hp -= 1;
                 enemies[i].lastHitTime = Date.now();
 
-                // ==========================================
-                // ON-HIT EFFECTS (LIFESTEAL & MANASTEAL)
-                // ==========================================
-
-                // Process Lifesteal
+                // Lifesteal
                 if (window.hasLifesteal && player) {
                     let maxHpRef = player.maxHp || window.maxHealth || 100;
-                    let healAmount = 5; 
-                    player.hp = Math.min(maxHpRef, player.hp + healAmount);
-                    if (window.playerHealth !== undefined) {
-                        window.playerHealth = player.hp;
-                    }
-                    console.log("Lifesteal success: Restored " + healAmount + " HP");
+                    player.hp = Math.min(maxHpRef, player.hp + 5);
+                    console.log("Lifesteal success: Restored 5 HP");
                 }
 
-                // Process Manasteal (Mirrors lifesteal perfectly)
+                // Manasteal
                 if (window.hasManasteal && player) {
                     let maxMagicRef = player.maxMagic || window.maxMagic || 100;
-                    let manaRestoreAmount = 5; 
-                    player.magic = Math.min(maxMagicRef, player.magic + manaRestoreAmount);
-                    if (window.playerMagic !== undefined) {
-                        window.playerMagic = player.magic;
-                    }
-                    console.log("Manasteal success: Restored " + manaRestoreAmount + " Magic");
+                    player.magic = Math.min(maxMagicRef, player.magic + 5);
+                    console.log("Manasteal success: Restored 5 Magic");
                 }
 
-                // ==========================================
-// ENEMY ELIMINATION & STORE KILL TRACKING
-// ==========================================
-if (enemies[i].hp <= 0) {
-    let isBoss = (enemies[i].hasOwnProperty('isBoss') && enemies[i].isBoss);
-    score += isBoss ? 10 : 1;
+                // Enemy death
+                if (enemies[i].hp <= 0) {
 
-    if (window.PlayerStats) {
-        let xpGained = isBoss ? 25 : 5;
-        let soulsGained = isBoss ? 100 : 50;
-        
-        window.PlayerStats.addXP(xpGained);
-        window.PlayerStats.addSouls(soulsGained);
+                    let isBoss = enemies[i].isBoss === true;
+                    score += isBoss ? 10 : 1;
 
-        if (window.PlayerStats.healthKills === undefined) {
-            window.PlayerStats.healthKills = 0;
-        }
-        if (window.PlayerStats.magicKills === undefined) {
-            window.PlayerStats.magicKills = 0;
-        }
-        
-        window.PlayerStats.healthKills += 1; 
-        window.PlayerStats.magicKills += 1; 
-        console.log(`Kills tracked - Health: ${window.PlayerStats.healthKills}, Magic: ${window.PlayerStats.magicKills}`);
-    }
+                    if (window.PlayerStats) {
+                        window.PlayerStats.addXP(isBoss ? 25 : 5);
+                        window.PlayerStats.addSouls(isBoss ? 100 : 50);
 
-    // NEW PROGRESSION HOOK: Send death signal straight to our RoundManager!
-    if (window.RoundManager) {
-        window.RoundManager.registerKill(isBoss);
-    }
+                        window.PlayerStats.healthKills = (window.PlayerStats.healthKills || 0) + 1;
+                        window.PlayerStats.magicKills = (window.PlayerStats.magicKills || 0) + 1;
+                    }
 
-    // Existing clean up splicing code remains untouched
-    enemies.splice(i, 1);
-    enemiesWaitTime.splice(i, 1);
-    enemiesAnimationPosition.splice(i, 1);
-    enemiesPlayerCollision.splice(i, 1);
-    i--;
-}
+                    if (window.RoundManager) {
+                        window.RoundManager.registerKill(isBoss);
+                    }
+
+                    enemies.splice(i, 1);
+                    enemiesWaitTime.splice(i, 1);
+                    enemiesAnimationPosition.splice(i, 1);
+                    enemiesPlayerCollision.splice(i, 1);
+                    i--;
+                }
 
                 bullets[j].x = 9999;
                 bullets[j].y = 9999;
-                break; 
+                break;
             }
         }
     }
@@ -168,6 +137,12 @@ if (enemies[i].hp <= 0) {
 // ==========================================
 
 function checkEnemyPlayerCollisions() {
+
+    // Stop player damage during story or when dead
+    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+        return;
+    }
+
     const currentTime = Date.now();
 
     if (!window.globalPlayerInvincibleTime) {
@@ -190,19 +165,23 @@ function checkEnemyPlayerCollisions() {
             enemies[i].y + 79 * imagesScale > playerYStart &&
             enemies[i].y + 79 * imagesScale < playerYEnd;
 
-    if (inRangeX && inRangeY) {
-    if (currentTime - window.globalPlayerInvincibleTime > 2000) {
-        if (typeof player.hp !== 'undefined') {
-            player.hp -= 10; 
-            if (player.hp < 0) player.hp = 0;
-            
-            window.globalPlayerInvincibleTime = currentTime; 
-            console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
-        }
-    }
+        if (inRangeX && inRangeY) {
+
+            if (currentTime - window.globalPlayerInvincibleTime > 2000) {
+                if (typeof player.hp !== 'undefined') {
+                    player.hp -= 10;
+                    if (player.hp < 0) {
+                        player.hp = 0;
+                        window.playerDead = true; // mark dead once HP hits 0
+                    }
+
+                    window.globalPlayerInvincibleTime = currentTime;
+                    console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
+                }
+            }
 
             enemiesPlayerCollision[i] = false;
-            
+
             if (typeof enemyAttackAnimationFunction === 'function') {
                 enemyAttackAnimationFunction(i);
             }
@@ -222,6 +201,11 @@ function checkEnemyPlayerCollisions() {
 // ==========================================
 
 function moveEnemies() {
+
+    // Stop enemy movement during story or when dead
+    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+        return;
+    }
 
     for (let i = 0; i < enemies.length; i++) {
 

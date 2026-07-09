@@ -4,22 +4,25 @@ window.RoundManager = {
     round: 1,
     killsThisRound: 0,
 
-    // Testing Mode: Every single step requires exactly 1 kill to progress!
     roundRequirements: {
-        1: 1,      // 1 kill -> advances to Round 2 (Boss)
-        2: "boss", // 1 boss kill -> advances to Round 3
-        3: 1,      // 1 kill -> advances to Round 4 (Boss)
-        4: "boss", // 1 boss kill -> advances to Round 5
-        5: 1,      // 1 kill -> advances to Round 6 (Boss)
-        6: "boss", // 1 boss kill -> advances to Round 7
-        7: 1,      // 1 kill -> advances to Round 8 (Boss)
-        8: "boss", // 1 boss kill -> advances to Round 9
-        9: 1,      // 1 kill -> advances to Round 10 (Boss)
-        10: "boss" // Beat this boss -> Win game!
+        1: 1,
+        2: "boss",
+        3: 1,
+        4: "boss",
+        5: 1,
+        6: "boss",
+        7: 1,
+        8: "boss",
+        9: 1,
+        10: "boss"
     },
 
     registerKill(isBoss) {
-        // Handle Boss Encounter Stages
+        // FIX: Use NovelEngine instead of StoryManager
+        if (window.NovelEngine && window.NovelEngine.isActive) {
+            return;
+        }
+
         if (this.roundRequirements[this.round] === "boss") {
             if (isBoss) {
                 this.completeRound();
@@ -27,7 +30,6 @@ window.RoundManager = {
             return;
         }
 
-        // Handle Normal Horde Stages
         this.killsThisRound++;
 
         if (this.killsThisRound >= this.roundRequirements[this.round]) {
@@ -39,15 +41,40 @@ window.RoundManager = {
         console.log("Round " + this.round + " complete!");
 
         this.killsThisRound = 0;
-
-        // Reset global boss spawn tracking flag so the next boss stage functions correctly
         window.bossSpawnedThisRound = false;
 
-        // TEMPORARY TESTING CHANGE: Set to 2 instead of 10
-        if (this.round >= 10) {
-            console.log("VICTORY! You have completed the testing rounds!");
-            
-            // Remove the hidden class to reveal the customized visual victory layout
+        this.round++;
+
+        const incomingRoundScenes = {
+            2: "scene2",
+            4: "scene3",
+            6: "scene4",
+            8: "scene5",
+            10: "scene6"
+        };
+
+        let sceneKey = incomingRoundScenes[this.round] || null;
+
+        // FIX: Use NovelEngine instead of StoryManager
+        if (
+            sceneKey &&
+            window.NovelEngine &&
+            window.visualNovelData &&
+            window.visualNovelData[sceneKey]
+        ) {
+            window.NovelEngine.startScene(sceneKey);
+        } else {
+            console.log("No story scene mapped for entering round " + this.round);
+            this.resumeAfterScene();
+        }
+    },
+
+    resumeAfterScene() {
+        console.log("Round manager tracking active loop state for round " + this.round);
+
+        if (this.round > 10) {
+            console.log("VICTORY! You have completed all the testing rounds!");
+
             const victoryPanel = document.getElementById("victory-panel");
             if (victoryPanel) {
                 victoryPanel.classList.remove("hidden");
@@ -55,17 +82,14 @@ window.RoundManager = {
             return;
         }
 
-        this.round++;
+        // Game loop resumes automatically in NovelEngine.completeScene()
     },
 
-    // Centralized Difficulty Scaling System
     getEnemyMaxHP() {
-        // Return scaling value based clean on the current round number
         return 2 + (this.round * 2);
     },
 
     getBossMaxHP() {
-        // Return boss base hitpoints based cleanly on the current round number
         return 20 + (this.round * 10);
     },
 
