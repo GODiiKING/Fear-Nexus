@@ -6,13 +6,13 @@
 
 /* Overriding viewport setup to act as a layout overlay block inside Fear Nexus */
 #story-panel {
-    position: fixed;
+    position: absolute; /* This locks it to the parent container, not the window */
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999; /* Higher priority layer above standard HUD groups */
-    background: rgba(0, 0, 0, 0.75); /* Dynamic back screen dimming tint */
+    width: 101%; /* Fills the container, not the viewport */
+    height: 107%; /* Fills the container, not the viewport */
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
