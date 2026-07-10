@@ -7,7 +7,7 @@
 function updateBullets() {
 
     // Stop bullets completely during story or when dead
-    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
@@ -38,7 +38,7 @@ function updateBullets() {
 function checkBulletCollisions() {
 
     // Stop bullet hits during story or when dead
-    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
@@ -139,7 +139,7 @@ function checkBulletCollisions() {
 function checkEnemyPlayerCollisions() {
 
     // Stop player damage during story or when dead
-    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
@@ -203,7 +203,7 @@ function checkEnemyPlayerCollisions() {
 function moveEnemies() {
 
     // Stop enemy movement during story or when dead
-    if ((window.StoryManager && window.StoryManager.isActive) || window.playerDead === true) {
+    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 

@@ -47,16 +47,16 @@ function startGame() {
     // ⭐ FIX: Start canvas FIRST
     GameArea.start();
 
-    // ⭐ FIX: Start story SECOND
-    if (window.StoryManager) {
-        window.StoryManager.startScene("scene1");
+    // ⭐ FIX: Start story SECOND using NovelEngine instead of StoryManager
+    if (window.NovelEngine) {
+        window.NovelEngine.startScene("scene1");
     }
 
     // ⭐ FIX: DO NOT start game loop again
-    // (GameArea.start already did it, and StoryManager paused it)
+    // (GameArea.start already did it, and NovelEngine paused it)
 
     // FIX: Only show combat UI if a narrative scene is not active
-    if (!window.StoryManager || !window.StoryManager.isActive) {
+    if (!window.NovelEngine || !window.NovelEngine.isActive) {
         showUI();
     }
     
@@ -118,7 +118,7 @@ function startGame() {
     enemies = [];
 
     // ⭐ FIX: Only spawn enemies if story is NOT active
-    if (!window.StoryManager.isActive) {
+    if (!window.NovelEngine || !window.NovelEngine.isActive) {
         spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
     }
 
@@ -141,12 +141,13 @@ function startGame() {
     });
     
     window.addEventListener("mousedown", (e) => {
-        if (window.StoryManager && window.StoryManager.isActive) {
+        // FIX: Route mouse clicks to NovelEngine
+        if (window.NovelEngine && window.NovelEngine.isActive) {
             if (e.button === 0) {
                 let currentTime = Date.now();
                 if (currentTime > lastStoryClickTime + STORY_CLICK_DELAY) {
                     lastStoryClickTime = currentTime;
-                    window.StoryManager.advanceLine();
+                    window.NovelEngine.advanceLine();
                 }
             }
             return; 

@@ -88,33 +88,33 @@ window.NovelEngine = {
     },
 
     completeScene: function() {
-        this.isActive = false;
-        
-        // Re-hide the display interface structure setup container layer overlay
-        const panel = document.getElementById("story-panel");
-        if (panel) panel.classList.add("hidden");
+    this.isActive = false;
+    console.log("GAME RESUMED (NovelEngine)");
 
-        const nameElement = document.getElementById("speakerName");
-        const ziziusSprite = document.getElementById("ziziusSprite");
-        const asmodeusSprite = document.getElementById("asmodeusSprite");
-
-        if (nameElement) nameElement.innerText = "";
-        if (ziziusSprite) ziziusSprite.classList.remove("active");
-        if (asmodeusSprite) asmodeusSprite.classList.remove("active");
-
-        console.log("Scene finished execution thread. Resuming Nexus wave progression parameters.");
-
-        // ⭐ RESUME GAME LOOP ⭐
-        if (typeof GameArea !== "undefined") {
-            GameArea.interval = setInterval(updateGameArea, 20);
-            console.log("GAME RESUMED (NovelEngine)");
-        }
-        
-        // Callback hook execution pipeline trigger loop sequence
-        if (window.RoundManager && typeof window.RoundManager.resumeAfterScene === "function") {
-            window.RoundManager.resumeAfterScene();
-        }
+    // 1. Restart the main loop
+    if (typeof GameArea !== "undefined") {
+        GameArea.interval = setInterval(updateGameArea, 20);
     }
+
+    // 2. FORCE RESTART the spawn timer
+    // We clear any existing one first to prevent "double-spawning" bugs
+    if (typeof spawnEnemiesInterval !== "undefined") {
+        clearInterval(spawnEnemiesInterval);
+    }
+    
+    // Only spawn if we are not at a Game Over state
+    if (typeof spawnEnemy === "function" && !window.playerDead) {
+        spawnEnemiesInterval = setInterval(spawnEnemy, typeof getRandomInterval === "function" ? getRandomInterval() : 2000);
+    }
+
+    // 3. Hide the story panel
+    const panel = document.getElementById("story-panel");
+    if (panel) panel.classList.add("hidden");
+
+    if (window.RoundManager && typeof window.RoundManager.resumeAfterScene === "function") {
+        window.RoundManager.resumeAfterScene();
+    }
+}
 };
 
 const visualNovelData = {
