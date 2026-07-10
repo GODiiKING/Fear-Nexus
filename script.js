@@ -430,3 +430,12 @@ function runStorePassiveUpgrades() {
         window.lastTrackedY = player.y;
     }
 }
+
+const gameContainer = document.getElementById('game-container'); // Or your canvas ID
+
+// Stop the context menu (right click)
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Stop text selection and drag events
+document.addEventListener('selectstart', (e) => e.preventDefault());
+document.addEventListener('dragstart', (e) => e.preventDefault());

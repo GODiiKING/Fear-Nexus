@@ -132,3 +132,23 @@
     opacity: 0.5;
     text-transform: uppercase;
 }
+
+/* Combined and optimized to cover both elements and disable highlights */
+canvas, 
+#game-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    -webkit-touch-callout: none;
+    touch-action: none;
+}
+
+/* Insurance policy for any accidental selection */
+::selection {
+    background: transparent;
+}
+::-moz-selection {
+    background: transparent;
+}
