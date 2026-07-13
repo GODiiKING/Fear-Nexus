@@ -5,15 +5,15 @@ window.RoundManager = {
     killsThisRound: 0,
 
     roundRequirements: {
-        1: 1,
+        1: 5,
         2: "boss",
-        3: 1,
+        3: 10,
         4: "boss",
-        5: 1,
+        5: 15,
         6: "boss",
-        7: 1,
+        7: 20,
         8: "boss",
-        9: 1,
+        9: 25,
         10: "boss"
     },
 
