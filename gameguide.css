@@ -174,3 +174,134 @@ h3 a:hover {
   .play-button:hover {
     background-color: #0000;
 }
+
+/* Container for each control */
+.control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #080808;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 180px;
+    transition: transform 0.2s;
+}
+
+.control:hover {
+    transform: scale(1.05);
+}
+
+/* Keyboard key style */
+.key {
+    width: 80px;
+    height: 80px;
+    background: #1b1b1b;
+    border: 2px solid #d5c8af;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    color: #ffffff;
+    font-family: 'Lexend Exa', sans-serif;
+}
+
+/* Mouse icon recreated in CSS */
+.mouse-icon {
+    width: 80px;
+    height: 120px;
+    background: #1b1b1b;
+    border-radius: 40px;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border: 2px solid #d5c8af;
+}
+
+.mouse-icon .left {
+    width: 50%;
+    background: #ff3b3b;
+}
+
+.mouse-icon .right {
+    width: 50%;
+    background: #1b1b1b;
+}
+
+.control p {
+    margin-top: 10px;
+    color: #d5c8af;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Row layout for controls */
+.controls-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+/* Individual control box */
+.control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #080808;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 180px;
+    transition: transform 0.2s;
+}
+
+.control:hover {
+    transform: scale(1.05);
+}
+
+/* Keyboard key style */
+.key {
+    width: 80px;
+    height: 80px;
+    background: #1b1b1b;
+    border: 2px solid #d5c8af;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    color: #ffffff;
+    font-family: 'Lexend Exa', sans-serif;
+}
+
+/* Mouse icon recreated in CSS */
+.mouse-icon {
+    width: 80px;
+    height: 120px;
+    background: #1b1b1b;
+    border-radius: 40px;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border: 2px solid #d5c8af;
+}
+
+.mouse-icon .left {
+    width: 50%;
+    background: #ff3b3b;
+}
+
+.mouse-icon .right {
+    width: 50%;
+    background: #1b1b1b;
+}
+
+.control p {
+    margin-top: 10px;
+    color: #d5c8af;
+    font-size: 1rem;
+    text-align: center;
+}

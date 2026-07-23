@@ -5,66 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Play the greatest battle arena in the world">
     <title>Fear Nexus - Game Guide</title>
-    <!-- Linking external fonts for styling -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Acme&family=Lexend+Exa:wght@100..900&display=swap" rel="stylesheet">
-    <!-- External stylesheet for game guide page -->
+
     <link rel="stylesheet" href="gameguide.css">
 </head>
-<!-- This HTML structure is for a Fear Nexus game under development. -->
+
 <body>
-    <!-- Main Content Section -->
-    <section class="content">
-        <div class="stat-section" id="">
-            <br>
-            <div class="container">
-                <!-- Control for moving forward -->
-                <div class="text-1">
-                    <div class="text-content">
-                        <img src="images/control/controls1.png" alt="">
-                        <div class="text-details">
-                            <h3>Move Forward</h3>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Control for moving back -->
-                <div class="text-1">
-                    <div class="text-content">
-                        <img src="images/control/controls2.png" alt="">
-                        <div class="text-details">
-                            <h3>Move Back</h3>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Control for shooting -->
-                <div class="text-1">
-                    <div class="text-content">
-                        <img src="images/control/left-mouse-click.png" alt="">
-                        <div class="text-details">
-                            <h3>Shoot</h3>
-                        </div>
-                    </div>
-                </div>
+<section class="content">
 
-                <!-- Control for restarting the game -->
-                <div class="text-1">
-                    <div class="text-content">
-                        <img src="images/control/controls3.png" alt="">
-                        <div class="text-details">
-                            <h3>Restart</h3>
-                        </div>
-                    </div>
-                </div>
+    <div class="controls-row">
+
+        <div class="control">
+            <div class="key">W</div>
+            <p>Move Forward</p>
+        </div>
+
+        <div class="control">
+            <div class="key">S</div>
+            <p>Move Back</p>
+        </div>
+
+        <div class="control">
+            <div class="mouse-icon">
+                <div class="left"></div>
+                <div class="right"></div>
             </div>
+            <p>Shoot</p>
         </div>
-        <div class="button-container">
-            <a href="gameplay.html" class="play-button">Play Now</a>
+
+        <div class="control">
+            <div class="key">R</div>
+            <p>Restart</p>
         </div>
-    </section>
-    
-    <script src="js/main.js"></script>
+
+    </div>
+
+    <div class="button-container">
+        <a href="gameplay.html" class="play-button">Play Now</a>
+    </div>
+
+</section>
+
+<script src="js/main.js"></script>
 </body>
 </html>
