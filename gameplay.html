@@ -3,91 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="gameplay.css">
-    <link rel="stylesheet" href="css/novel.css"> <script src="script.js"></script>
+    <link rel="stylesheet" href="css/novel.css">
+    <script src="script.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <title>Fear Nexus</title>
 </head>
 <body onload="startGame()">
     <h1 class="Game-Title" style="font-family: 'Acme', sans-serif;"></h1>
 
-    <div id="game-container">
-        <div id="ui-layer">
-            
-            <div class="ui-group health-group">
-                <div class="abilities">
-                    <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
-                    <img src="images/ui/square.png" class="ability-icon ready" id="ab2">
-                    <img src="images/ui/square.png" class="ability-icon ready" id="ab3">
-                </div>
-                <div class="bar-wrapper">
-                    <div class="icon">❤️</div>
-                    <div class="tube" id="health-tube">
-                        <div class="fill health-fill" id="health-fill"></div>
-                        <span class="bar-text" id="health-text">100/100</span>
+    <div id="viewport-scaler">
+        <div id="game-container">
+            <div id="ui-layer">
+
+                <div class="ui-group health-group">
+                    <div class="abilities">
+                        <img src="images/ui/square.png" class="ability-icon ready" id="ab1">
+                        <img src="images/ui/square.png" class="ability-icon ready" id="ab2">
+                        <img src="images/ui/square.png" class="ability-icon ready" id="ab3">
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="icon">❤️</div>
+                        <div class="tube" id="health-tube">
+                            <div class="fill health-fill" id="health-fill"></div>
+                            <span class="bar-text" id="health-text">100/100</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="ui-group xp-group">
+                    <div class="bar-wrapper">
+                        <div class="tube xp-tube" id="xp-tube">
+                            <div class="fill xp-fill" id="xp-fill"></div>
+                            <span class="bar-text" id="xp-text">Level 1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-group magic-group">
+                    <div class="store-stack">
+                        <div class="store-item" onclick="UpgradeManager.toggleStore()">
+                            <span class="store-count" id="hud-upgrades-count">0</span>
+                            <span class="store-emoji">🏪</span>
+                        </div>
+                        <div class="store-item" onclick="PerkStoreManager.toggleStore()">
+                            <span class="store-count" id="hud-perks-count">0</span>
+                            <span class="store-emoji">💀</span>
+                        </div>
+                    </div>
+
+                    <div class="abilities">
+                        <img src="images/ui/triangle.png" class="ability-icon ready" id="ab4">
+                        <img src="images/ui/triangle.png" class="ability-icon ready" id="ab5">
+                        <img src="images/ui/triangle.png" class="ability-icon ready" id="ab6">
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="icon">💧</div>
+                        <div class="tube">
+                            <div class="fill magic-fill" id="magic-fill"></div>
+                            <span class="bar-text" id="magic-text">100/100</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-
-            <div class="ui-group xp-group">
-                <div class="bar-wrapper">
-                    <div class="tube xp-tube" id="xp-tube">
-                        <div class="fill xp-fill" id="xp-fill"></div>
-                        <span class="bar-text" id="xp-text">Level 1</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ui-group magic-group">
-                <div class="store-stack">
-                    <div class="store-item" onclick="UpgradeManager.toggleStore()">
-                        <span class="store-count" id="hud-upgrades-count">0</span>
-                        <span class="store-emoji">🏪</span>
-                    </div>
-                    <div class="store-item" onclick="PerkStoreManager.toggleStore()">
-                        <span class="store-count" id="hud-perks-count">0</span>
-                        <span class="store-emoji">💀</span>
-                    </div>
-                </div>
-
-                <div class="abilities">
-                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab4">
-                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab5">
-                    <img src="images/ui/triangle.png" class="ability-icon ready" id="ab6">
-                </div>
-                <div class="bar-wrapper">
-                    <div class="icon">💧</div>
-                    <div class="tube">
-                        <div class="fill magic-fill" id="magic-fill"></div>
-                        <span class="bar-text" id="magic-text">100/100</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
 
             <div id="story-panel" class="hidden">
-        <div class="vnViewport">
-            <div class="characterLayer">
-                <img id="ziziusSprite" class="spriteElement" src="" alt="">
-                <img id="asmodeusSprite" class="spriteElement" src="" alt="">
-            </div>
-            
-            <div class="dialogueContainer">
-                <div id="speakerName" class="speakerLabel"></div>
-                <div id="interactiveBox" class="dialogueWindow">
-                    <p id="sceneText"></p>
-                    <div class="actionPrompt">Click window to advance</div>
+                <div class="vnViewport">
+                    <div class="characterLayer">
+                        <img id="ziziusSprite" class="spriteElement" src="" alt="">
+                        <img id="asmodeusSprite" class="spriteElement" src="" alt="">
+                    </div>
+
+                    <div class="dialogueContainer">
+                        <div id="speakerName" class="speakerLabel"></div>
+                        <div id="interactiveBox" class="dialogueWindow">
+                            <p id="sceneText"></p>
+                            <div class="actionPrompt">Click window to advance</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <div id="levelup-panel" class="hidden">
         <div class="panel-wrapper container">
             <h1 class="panel-title">LEVEL UP</h1>
             <p class="panel-subtitle">Select a reward to empower your current run</p>
-            
+
             <div class="card-grid interface">
                 <div class="reward-card" onclick="LevelUpManager.chooseHealth()">
                     <h2 class="reward-title">HEALTH</h2>
@@ -106,7 +109,7 @@
         <div class="panel-wrapper container">
             <h1 class="panel-title">UPGRADE STORE</h1>
             <p class="panel-subtitle">Choose one newly unlocked mechanic for this run</p>
-            
+
             <div class="card-grid interface" id="upgrade-cards-container">
                 <div class="reward-card" onclick="UpgradeManager.selectUpgrade('lifesteal')">
                     <h2 class="reward-title">LIFESTEAL</h2>
@@ -150,9 +153,9 @@
         <div class="panel-wrapper container">
             <h1 class="panel-title">PERK STORE</h1>
             <p class="panel-subtitle">Exchange your collected souls for celestial enhancements</p>
-            
+
             <div class="card-grid interface">
-                
+
                 <div class="reward-card" id="card-healthRegen" onclick="PerkStoreManager.buyPerk('healthRegen')">
                     <h2 class="reward-title">Celestial Vitality</h2>
                     <p class="reward-desc">Regenerate health passively over time</p>
@@ -210,7 +213,7 @@
         <div class="panel-wrapper container">
             <h1 class="panel-title text-uppercase" style="color: #ffc048; text-shadow: 0 0 25px rgba(255, 192, 72, 0.7);">VICTORY ACHEIVED</h1>
             <p class="panel-subtitle">You have cleared all 10 rounds of Fear Nexus</p>
-            
+
             <div class="interface-panel" style="max-width: 450px; background: #06060e; border-color: #291f22;">
                 <p class="body-text" style="margin-bottom: 20px;">The Nexus rests... for now. Your celestial power has broken the cycle.</p>
                 <button class="menu-toggle text-center pink-text" onclick="window.location.reload()" style="min-width: 180px; display: inline-block;">
@@ -219,19 +222,19 @@
             </div>
         </div>
     </div>
-<div id="game-container">
-<script src="js/config.js"></script>
-<script src="js/playerstats.js"></script>
-<script src="js/novelengine.js"></script>
-<script src="js/storyManager.js"></script> 
-<script src="js/levelupmanager.js"></script>
-<script src="js/roundmanager.js"></script>
-<script src="js/entities.js"></script>
-<script src="js/abilitysystem.js"></script>
-<script src="js/enemy.js"></script>
-<script src="js/collisions.js"></script>
-<script src="js/character.js"></script>
-<script src="js/game.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/playerstats.js"></script>
+    <script src="js/novelengine.js"></script>
+    <script src="js/storyManager.js"></script>
+    <script src="js/levelupmanager.js"></script>
+    <script src="js/roundmanager.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/abilitysystem.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/collisions.js"></script>
+    <script src="js/character.js"></script>
+    <script src="js/game.js"></script>
 
     <audio id="backgroundMusic"></audio>
     <script>
@@ -243,28 +246,28 @@
         ];
         const audio = document.getElementById("backgroundMusic");
         let hasStarted = false;
-        let isTransitioning = false; 
+        let isTransitioning = false;
 
         function playRandomTrack() {
-            if (isTransitioning) return; 
+            if (isTransitioning) return;
             isTransitioning = true;
 
             try {
                 audio.pause();
-                
+
                 const randomIndex = Math.floor(Math.random() * audioTracks.length);
                 audio.src = audioTracks[randomIndex];
-                audio.load(); 
+                audio.load();
 
                 let playPromise = audio.play();
                 if (playPromise !== undefined) {
                     playPromise
                         .then(() => {
-                            isTransitioning = false; 
+                            isTransitioning = false;
                         })
                         .catch(error => {
                             console.log("Audio thread safely intercepted.");
-                            isTransitioning = false; 
+                            isTransitioning = false;
                         });
                 } else {
                     isTransitioning = false;
@@ -275,13 +278,23 @@
         }
 
         audio.addEventListener("ended", playRandomTrack);
-        
+
         document.addEventListener("click", () => {
             if (!hasStarted) {
                 hasStarted = true;
                 playRandomTrack();
             }
         });
+    </script>
+
+    <script>
+        function fitGameToScreen() {
+            const stage = document.getElementById('game-container');
+            const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+            stage.style.transform = `scale(${scale})`;
+        }
+        fitGameToScreen();
+        window.addEventListener('resize', fitGameToScreen);
     </script>
 </body>
 </html>

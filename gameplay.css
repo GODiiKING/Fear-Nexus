@@ -23,12 +23,22 @@ canvas {
     background-color: rgba(255, 255, 255, 0.8);
 }
 
+/* Scales the whole 1280x720 stage to fit any viewport, keeping it centered */
+#viewport-scaler {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 
 #game-container {
     position: relative;
     width: 1280px;
     height: 720px;
-    margin: 23px auto 0 auto;
+    flex-shrink: 0;
+    transform-origin: center center;
 }
 
 #Game-Window {
@@ -267,11 +277,10 @@ canvas {
 
 .interface {
     display: grid;
-    /* Changed minmax from 200px to 170px to naturally fit more columns dynamically */
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
-    gap: 16px; /* Reduced from 25px to save space */
+    gap: 16px;
     width: 100%;
-    max-width: 800px; /* Expanded slightly from 720px to utilize canvas width better */
+    max-width: 800px;
     justify-content: center;
     justify-items: center;
 }
@@ -280,8 +289,8 @@ canvas {
     background-color: #06060e;
     border: 2px solid #291f22;
     border-radius: 10px;
-    padding: 10px 8px; /* Tighter internal padding */
-    max-width: 180px;  /* Reduced from 220px to keep them minimal */
+    padding: 10px 8px;
+    max-width: 180px;
     min-width: 140px;
     text-align: center;
     cursor: pointer;
@@ -297,12 +306,12 @@ canvas {
 .reward-title {
     font-family: 'Acme', sans-serif;
     color: #ffc048;
-    font-size: 1.25rem; /* Reduced from 1.6rem to prevent text wrapping headers */
-    margin: 0 0 6px 0;  /* Closer spacing */
+    font-size: 1.25rem;
+    margin: 0 0 6px 0;
 }
 
 .reward-desc {
-    font-size: 0.72rem; /* Slightly smaller body text for easier reading */
+    font-size: 0.72rem;
     line-height: 1.3;
     color: #ffffff;
     margin: 0;
@@ -337,19 +346,6 @@ canvas {
 
 @keyframes redSweep {
     100% { left: 100%; }
-}
-
-/* ==========================================
-   RESPONSIVE DESIGN VIEWPORTS
-   ========================================== */
-@media (max-width: 768px) {
-    canvas {
-        width: 100%;
-    }
-
-    .Game-Title {
-        font-size: 50px;
-    }
 }
 
 /* ==========================================
