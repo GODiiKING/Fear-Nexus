@@ -68,3 +68,16 @@ let abilitiesReady = {
     ab1: true, ab2: true, ab3: true,
     ab4: true, ab5: true, ab6: true
 };
+
+// ==========================================
+// UPGRADE-CHAIN STATE (new)
+// ==========================================
+
+// Tracks which ability (if any) fired the currently in-flight shot, so
+// collisions.js can attribute a resulting kill to the correct counter:
+// 'square' -> healthKills (Lifesteal), 'triangle' -> magicKills (Manasteal),
+// null -> a free/regular click-shot, counted only toward PlayerStats.kills.
+window.activeBulletType = null;
+
+// Whether this run's one-time Revival safety net has already been used.
+window.revivalConsumed = false;

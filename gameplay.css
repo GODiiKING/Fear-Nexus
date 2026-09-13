@@ -521,17 +521,26 @@ canvas,
     background: transparent;
 }
 
-.reward-card .badge {
-    position: relative;
-    top: auto;
-    right: auto;
+/* ==========================================
+   UPGRADE/PERK LOCK & MAX STATES
+   (classes were already being toggled by JS but had no styling)
+   ========================================== */
+.reward-card .badge-rank,
+.reward-card .badge-cost {
+    position: static !important;   /* REMOVE absolute positioning */
     display: block;
     margin-top: 6px;
-    font-size: 0.7rem;
+    font-family: 'Lexend Exa', sans-serif;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
 }
 
-.reward-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+.reward-card .badge-rank {
+    color: #ffffff;
+}
+
+.reward-card .badge-cost {
+    color: #ffffff;
+    opacity: 0.85;
 }

@@ -18,7 +18,6 @@ window.RoundManager = {
     },
 
     registerKill(isBoss) {
-        // FIX: Use NovelEngine instead of StoryManager
         if (window.NovelEngine && window.NovelEngine.isActive) {
             return;
         }
@@ -55,7 +54,6 @@ window.RoundManager = {
 
         let sceneKey = incomingRoundScenes[this.round] || null;
 
-        // FIX: Use NovelEngine instead of StoryManager
         if (
             sceneKey &&
             window.NovelEngine &&
@@ -81,8 +79,6 @@ window.RoundManager = {
             }
             return;
         }
-
-        // Game loop resumes automatically in NovelEngine.completeScene()
     },
 
     getEnemyMaxHP() {

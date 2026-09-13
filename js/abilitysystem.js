@@ -18,17 +18,16 @@ window.abilitySystem = {
 
         let ability = this.data[type];
         if (ability.charges > 0) {
-            
+
             // Health Cost Check
             if (ability.costType === 'hp') {
-                // Cost is always deducted regardless of lifesteal unlock status
                 if (player && player.hp !== undefined && player.hp >= ability.costAmount) {
                     player.hp -= ability.costAmount;
-                    
+
                     if (window.playerHealth !== undefined) {
                         window.playerHealth = player.hp;
                     }
-                    
+
                     if (window.hasLifesteal) {
                         console.log("Lifesteal weapon active HP deducted on launch");
                     }
@@ -42,7 +41,7 @@ window.abilitySystem = {
             if (ability.costType === 'magic') {
                 if (player && player.magic !== undefined && player.magic >= ability.costAmount) {
                     player.magic -= ability.costAmount;
-                    
+
                     if (window.playerMagic !== undefined) {
                         window.playerMagic = player.magic;
                     }
@@ -52,13 +51,17 @@ window.abilitySystem = {
                 }
             }
 
+            // Tag the shot about to fire so collisions.js can attribute a
+            // resulting kill correctly: 'square' -> healthKills, 'triangle' -> magicKills.
+            window.activeBulletType = type;
+
             ability.charges--;
-            
+
             if (typeof executeProjectileLaunch === 'function') {
                 executeProjectileLaunch();
             }
 
-            window.abilitySystem.updateUI(); 
+            window.abilitySystem.updateUI();
             this.debugText = `Used ${type}`;
             setTimeout(() => { this.debugText = ""; }, 1000);
         }
