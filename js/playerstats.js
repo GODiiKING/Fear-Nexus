@@ -21,6 +21,10 @@ window.PlayerStats = {
     moveSpeedBonus: 0,
     attackSpeedBonus: 0,
 
+    // Kill counters used by UpgradeManager.requirement()
+    healthKills: 0,
+    magicKills: 0,
+
     /**
      * Increments run experience points and handles leveling thresholds
      * @param {number} amount - The quantity of experience earned
@@ -58,6 +62,24 @@ window.PlayerStats = {
         // Physically update the interface numerical display tracker
         this.renderSoulCounter();
         console.log("[SOULS] Earned " + amount + " souls. Total: " + this.souls);
+
+        // Keep UpgradeManager UI in sync (if present)
+        if (window.UpgradeManager && typeof window.UpgradeManager.updateStoreUI === "function") {
+            try {
+                window.UpgradeManager.updateStoreUI();
+            } catch (e) {
+                console.warn("[UpgradeManager] updateStoreUI() threw:", e);
+            }
+        }
+
+        // Also keep PerkStoreManager in sync if present
+        if (window.PerkStoreManager && typeof window.PerkStoreManager.updateUI === "function") {
+            try {
+                window.PerkStoreManager.updateUI();
+            } catch (e) {
+                console.warn("[PerkStoreManager] updateUI() threw:", e);
+            }
+        }
     },
 
     /**
@@ -163,3 +185,4 @@ window.LevelUpManager = {
         }
     }
 };
+

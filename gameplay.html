@@ -106,48 +106,65 @@
     </div>
 
     <div id="upgrade-panel" class="hidden">
-        <div class="panel-wrapper container">
-            <h1 class="panel-title">UPGRADE STORE</h1>
-            <p class="panel-subtitle">Choose one newly unlocked mechanic for this run</p>
+  <div class="panel-wrapper container">
+    <h1 class="panel-title">UPGRADE STORE</h1>
+    <p class="panel-subtitle">Choose one newly unlocked mechanic for this run</p>
 
-            <div class="card-grid interface" id="upgrade-cards-container">
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('lifesteal')">
-                    <h2 class="reward-title">LIFESTEAL</h2>
-                    <p class="reward-desc">Health abilities gain a baseline chance to restore your vital health points upon enemy elimination</p>
-                </div>
+    <div class="card-grid interface" id="upgrade-cards-container">
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('manasteal')">
-                    <h2 class="reward-title">MANASTEAL</h2>
-                    <p class="reward-desc">Magic abilities gain a baseline chance to instantly replenish spent mana resources</p>
-                </div>
+      <div id="card-lifesteal" class="reward-card" onclick="UpgradeManager.selectUpgrade('lifesteal')">
+        <h2 class="reward-title">LIFESTEAL</h2>
+        <p class="reward-desc">Health abilities gain a baseline chance to restore your vital health points upon enemy elimination</p>
+        <div id="level-lifesteal" class="badge">Rank: 0/1</div>
+        <div id="cost-lifesteal" class="badge">100 Souls</div>
+      </div>
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('revival')">
-                    <h2 class="reward-title">REVIVAL</h2>
-                    <p class="reward-desc">Provides a critical safety net by granting one automatic resurrection when health hits zero</p>
-                </div>
+      <div id="card-manasteal" class="reward-card" onclick="UpgradeManager.selectUpgrade('manasteal')">
+        <h2 class="reward-title">MANASTEAL</h2>
+        <p class="reward-desc">Magic abilities gain a baseline chance to instantly replenish spent mana resources</p>
+        <div id="level-manasteal" class="badge">Rank: 0/1</div>
+        <div id="cost-manasteal" class="badge">100 Souls</div>
+      </div>
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('sanguineAura')">
-                    <h2 class="reward-title">SANGUINE AURA</h2>
-                    <p class="reward-desc">Every second health ability activates a specialized visual aura that damages all nearby enemies</p>
-                </div>
+      <div id="card-revival" class="reward-card" onclick="UpgradeManager.selectUpgrade('revival')">
+        <h2 class="reward-title">REVIVAL</h2>
+        <p class="reward-desc">Provides a critical safety net by granting one automatic resurrection when health hits zero</p>
+        <div id="level-revival" class="badge">Rank: 0/1</div>
+        <div id="cost-revival" class="badge">150 Souls</div>
+      </div>
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('manaZone')">
-                    <h2 class="reward-title">MANA ZONE</h2>
-                    <p class="reward-desc">Remaining stationary for three seconds generates a continuous localized field of automated projectiles</p>
-                </div>
+      <div id="card-sanguineAura" class="reward-card" onclick="UpgradeManager.selectUpgrade('sanguineAura')">
+        <h2 class="reward-title">SANGUINE AURA</h2>
+        <p class="reward-desc">Every second health ability activates a specialized visual aura that damages all nearby enemies</p>
+        <div id="level-sanguineAura" class="badge">Rank: 0/1</div>
+        <div id="cost-sanguineAura" class="badge">200 Souls</div>
+      </div>
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('astra')">
-                    <h2 class="reward-title">ASTRA</h2>
-                    <p class="reward-desc">Unlocks your powerful right click special attack to unleash catastrophic celestial damage</p>
-                </div>
+      <div id="card-manaZone" class="reward-card" onclick="UpgradeManager.selectUpgrade('manaZone')">
+        <h2 class="reward-title">MANA ZONE</h2>
+        <p class="reward-desc">Remaining stationary for three seconds generates a continuous localized field of automated projectiles</p>
+        <div id="level-manaZone" class="badge">Rank: 0/1</div>
+        <div id="cost-manaZone" class="badge">200 Souls</div>
+      </div>
 
-                <div class="reward-card" onclick="UpgradeManager.selectUpgrade('asmodeus')">
-                    <h2 class="reward-title">ASMODEUS</h2>
-                    <p class="reward-desc">Grants a permanent chance for an optional boss to appear, rewarding an instant level up upon victory</p>
-                </div>
-            </div>
-        </div>
+      <div id="card-astra" class="reward-card" onclick="UpgradeManager.selectUpgrade('astra')">
+        <h2 class="reward-title">ASTRA</h2>
+        <p class="reward-desc">Unlocks your powerful right click special attack to unleash catastrophic celestial damage</p>
+        <div id="level-astra" class="badge">Rank: 0/1</div>
+        <div id="cost-astra" class="badge">250 Souls</div>
+      </div>
+
+      <div id="card-asmodeus" class="reward-card" onclick="UpgradeManager.selectUpgrade('asmodeus')">
+        <h2 class="reward-title">ASMODEUS</h2>
+        <p class="reward-desc">Grants a permanent chance for an optional boss to appear, rewarding an instant level up upon victory</p>
+        <div id="level-asmodeus" class="badge">Rank: 0/1</div>
+        <div id="cost-asmodeus" class="badge">300 Souls</div>
+      </div>
+
     </div>
+  </div>
+</div>
+
 
     <div id="perk-panel" class="hidden">
         <div class="panel-wrapper container">

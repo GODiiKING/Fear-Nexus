@@ -520,3 +520,18 @@ canvas,
 ::-moz-selection {
     background: transparent;
 }
+
+.reward-card .badge {
+    position: relative;
+    top: auto;
+    right: auto;
+    display: block;
+    margin-top: 6px;
+    font-size: 0.7rem;
+}
+
+.reward-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
