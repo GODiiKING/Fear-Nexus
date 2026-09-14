@@ -8,8 +8,6 @@
 ==============================================================
 */
 
-// Refreshes BOTH HUD soul badges (🏪 upgrades and 💀 perks) from the
-// single shared pool. Call this any time souls change, from either store.
 function refreshSoulHUDs() {
     const souls = window.PlayerStats ? window.PlayerStats.souls : 0;
     const perksHud = document.getElementById("hud-perks-count");
@@ -86,6 +84,13 @@ window.PerkManager = {
             maxLevel: 10,
             apply() {
                 if (window.PlayerStats) window.PlayerStats.cooldownReduction = this.level * 0.05;
+
+                // Restart the ability regen interval immediately so the
+                // faster cooldown is felt on the very next purchase, not
+                // after the old 10s interval happens to cycle first.
+                if (window.abilitySystem && typeof window.abilitySystem.applyCooldownReduction === "function") {
+                    window.abilitySystem.applyCooldownReduction();
+                }
             }
         },
         xpGain: {
@@ -125,8 +130,6 @@ window.PerkManager = {
 
             window.PerkStoreManager.updateUI();
 
-            // Keep the Upgrade Store's HUD badge + lock states in sync too -
-            // both stores share this same soul pool.
             if (window.UpgradeManager && typeof window.UpgradeManager.updateStoreUI === "function") {
                 window.UpgradeManager.updateStoreUI();
             }
@@ -369,9 +372,6 @@ window.UpgradeManager = {
             pool.souls -= upgrade.cost;
             upgrade.level++;
 
-            // apply() must run before any UI refresh below, so cards that
-            // depend on this one (e.g. Sanguine Aura needs hasLifesteal)
-            // reflect the new state immediately, without reopening the panel.
             upgrade.apply();
 
             if (typeof pool.renderSoulCounter === "function") {
@@ -432,8 +432,6 @@ window.UpgradeManager = {
     }
 };
 
-// Initialize HUD + store visuals as soon as this file loads, so badges
-// never sit on placeholder text before the first purchase/kill happens.
 refreshSoulHUDs();
 window.UpgradeManager.updateStoreUI();
 window.PerkStoreManager.updateUI();

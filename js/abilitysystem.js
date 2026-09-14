@@ -7,6 +7,15 @@ window.abilitySystem = {
     },
     debugText: "System Loaded...",
 
+    // Counts successful HP-ability (square) casts, so Sanguine Aura can
+    // proc on every 2nd use as described: "Every second health ability
+    // activates an aura that damages nearby enemies."
+    healthAbilityUseCount: 0,
+
+    // Holds the current regen setInterval id so Time Warp can restart it
+    // at a faster rate without stacking duplicate intervals.
+    _regenInterval: null,
+
     handleKey: function(key) {
         console.log("System received key:", key);
         if (key === '1') this.use('square');
@@ -30,6 +39,14 @@ window.abilitySystem = {
 
                     if (window.hasLifesteal) {
                         console.log("Lifesteal weapon active HP deducted on launch");
+                    }
+
+                    // SANGUINE AURA: proc every 2nd HP-ability cast
+                    if (window.hasSanguineAura) {
+                        this.healthAbilityUseCount++;
+                        if (this.healthAbilityUseCount % 2 === 0 && typeof window.triggerSanguineAura === 'function') {
+                            window.triggerSanguineAura();
+                        }
                     }
                 } else {
                     console.log("Not enough health");
@@ -85,7 +102,21 @@ window.abilitySystem = {
             }
         }
         window.abilitySystem.updateUI();
+    },
+
+    // TIME WARP: recalculates the regen tick rate from PlayerStats.cooldownReduction
+    // (0 to 0.5 range across 10 levels) and restarts the interval so purchases
+    // take effect immediately instead of waiting for the old interval to cycle.
+    applyCooldownReduction: function() {
+        if (this._regenInterval) clearInterval(this._regenInterval);
+
+        let reduction = (window.PlayerStats && window.PlayerStats.cooldownReduction) || 0;
+        reduction = Math.min(reduction, 0.9); // safety clamp, never reach ~0ms
+        let intervalMs = Math.max(1000, Math.floor(10000 * (1 - reduction)));
+
+        this._regenInterval = setInterval(() => this.regen(), intervalMs);
     }
 };
 
-setInterval(() => window.abilitySystem.regen(), 10000);
+// Establishes the initial regen interval (10000ms with no Time Warp levels yet).
+window.abilitySystem.applyCooldownReduction();

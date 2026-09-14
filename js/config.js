@@ -70,14 +70,22 @@ let abilitiesReady = {
 };
 
 // ==========================================
-// UPGRADE-CHAIN STATE (new)
+// UPGRADE-CHAIN STATE
 // ==========================================
 
 // Tracks which ability (if any) fired the currently in-flight shot, so
 // collisions.js can attribute a resulting kill to the correct counter:
 // 'square' -> healthKills (Lifesteal), 'triangle' -> magicKills (Manasteal),
-// null -> a free/regular click-shot, counted only toward PlayerStats.kills.
+// null -> a free/regular click-shot or a passive proc (aura/zone/nova).
 window.activeBulletType = null;
 
 // Whether this run's one-time Revival safety net has already been used.
 window.revivalConsumed = false;
+
+// ==========================================
+// PASSIVE REGEN TIMER (fix for duplicate declaration)
+// ==========================================
+
+// DO NOT use "let passiveRegenTimer" again — it already exists somewhere else.
+// This safely initializes it without redeclaring.
+window.passiveRegenTimer = window.passiveRegenTimer || 0;
