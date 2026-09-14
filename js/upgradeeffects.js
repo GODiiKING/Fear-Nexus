@@ -1,19 +1,5 @@
 "use strict";
 
-/*
-==============================================================
- UPGRADE PAYOFFS
- Implements the actual gameplay effects for upgrades that were
- previously just flags (hasSanguineAura, hasManaZone, hasAstra,
- hasAsmodeus). Written standalone so it doesn't need script.js —
- it only touches globals already shared across the other classic
- <script> files (enemies, player, moveForward, etc.) and the
- resolveEnemyKill() helper exposed by collisions.js.
-
- Load this AFTER config.js, enemy.js, and collisions.js.
-==============================================================
-*/
-
 const PLAYER_SCREEN_X = 640;
 const PLAYER_SCREEN_Y = 360;
 
@@ -38,8 +24,6 @@ function damageEnemiesInRadius(radius, amount) {
             enemies[i].lastHitTime = Date.now();
 
             if (enemies[i].hp <= 0 && typeof window.resolveEnemyKill === 'function') {
-                // source is null: these are passive procs, not attributed
-                // to either ability's healthKills/magicKills counter
                 window.resolveEnemyKill(i, null);
             }
         }
@@ -47,22 +31,48 @@ function damageEnemiesInRadius(radius, amount) {
 }
 
 // ==========================================
-// SANGUINE AURA
-// Triggered from abilitysystem.js every 2nd HP-ability cast
+// SANGUINE AURA - every 2nd HP-ability cast
 // ==========================================
 const SANGUINE_AURA_RADIUS = 250;
 const SANGUINE_AURA_DAMAGE = 3;
 
-window.triggerSanguineAura = function() {
+function flashSanguineAura() {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+
+    const flash = document.createElement('div');
+    flash.style.position = 'absolute';
+    flash.style.left = '50%';
+    flash.style.top = '50%';
+    flash.style.width = (SANGUINE_AURA_RADIUS * 2) + 'px';
+    flash.style.height = (SANGUINE_AURA_RADIUS * 2) + 'px';
+    flash.style.marginLeft = (-SANGUINE_AURA_RADIUS) + 'px';
+    flash.style.marginTop = (-SANGUINE_AURA_RADIUS) + 'px';
+    flash.style.borderRadius = '50%';
+    flash.style.background = 'radial-gradient(circle, rgba(255,51,102,0.35), transparent 70%)';
+    flash.style.pointerEvents = 'none';
+    flash.style.zIndex = '400';
+    flash.style.opacity = '1';
+    flash.style.transform = 'scale(0.6)';
+    flash.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    container.appendChild(flash);
+
+    requestAnimationFrame(() => {
+        flash.style.opacity = '0';
+        flash.style.transform = 'scale(1)';
+    });
+    setTimeout(() => flash.remove(), 350);
+}
+
+window.triggerSanguineAura = function () {
     if (!window.hasSanguineAura) return;
     damageEnemiesInRadius(SANGUINE_AURA_RADIUS, SANGUINE_AURA_DAMAGE);
+    flashSanguineAura();
     console.log("[SANGUINE AURA] Pulse triggered.");
 };
 
 // ==========================================
-// MANA ZONE
-// Standing still (not holding W or S) for 3s opens a field that
-// ticks damage to nearby enemies every 0.5s while you stay still
+// MANA ZONE - stand still 3s, field ticks every 0.5s
 // ==========================================
 const MANA_ZONE_TRIGGER_MS = 3000;
 const MANA_ZONE_TICK_MS = 500;
@@ -105,16 +115,13 @@ setInterval(() => {
 }, MANA_ZONE_POLL_MS);
 
 // ==========================================
-// ASTRA
-// Right-click special attack: nova damage to every enemy currently
-// on screen, on a cooldown. Only claims right-click once unlocked,
-// so the browser's normal context menu still works until then.
+// ASTRA - right-click nova, on a cooldown
 // ==========================================
 const ASTRA_COOLDOWN_MS = 8000;
 const ASTRA_DAMAGE = 15;
 window.astraLastUsed = 0;
 
-document.addEventListener('contextmenu', function(event) {
+document.addEventListener('contextmenu', function (event) {
     if (!window.hasAstra) return;
     event.preventDefault();
 
@@ -165,57 +172,48 @@ function flashAstraScreen() {
 }
 
 // ==========================================
-// ASMODEUS
-// Once unlocked, a rare bonus boss has a chance to appear (outside
-// scripted boss rounds). Defeating it grants a guaranteed level-up
-// via resolveEnemyKill()'s isAsmodeus branch.
+// ASMODEUS - rare bonus boss, bigger than the round bosses
 // ==========================================
+const ASMODEUS_SPRITE = "images/boss/asmodeus.png";
+const ASMODEUS_SCALE_MULTIPLIER = 1.4; // 40% bigger than demon-lord / nexial-lord
 const ASMODEUS_CHECK_INTERVAL_MS = 5000;
 const ASMODEUS_SPAWN_CHANCE = 0.15;
 let asmodeusAlive = false;
 
-window.onAsmodeusDefeated = function() {
+window.onAsmodeusDefeated = function () {
     asmodeusAlive = false;
 };
 
-setInterval(() => {
-    if (typeof enemies === 'undefined') return;
-
-    // Self-correct if the boss disappeared some other way (e.g. a
-    // manual restart) instead of through resolveEnemyKill.
-    if (asmodeusAlive && !enemies.some(e => e && e.isAsmodeus)) {
-        asmodeusAlive = false;
-    }
-
-    if (!window.hasAsmodeus || asmodeusAlive || gameOver || window.playerDead) return;
-    if (window.NovelEngine && window.NovelEngine.isActive) return;
-    if (window.RoundManager && window.RoundManager.isBossRound()) return; // don't compete with the scripted round boss
-    if (enemies.length >= 8) return;
-
-    if (Math.random() < ASMODEUS_SPAWN_CHANCE) {
-        spawnAsmodeusBoss();
-    }
-}, ASMODEUS_CHECK_INTERVAL_MS);
-
-function spawnAsmodeusBoss() {
+// Callable directly (e.g. on purchase) or from the periodic chance-roll below.
+// Self-guards so it's always safe to call.
+window.spawnAsmodeusBoss = function () {
     if (typeof Component !== 'function' || typeof imagesScale === 'undefined') return;
+    if (asmodeusAlive) {
+        console.log("[ASMODEUS] He's already here.");
+        return;
+    }
+    if (typeof enemies !== 'undefined' && enemies.length >= 8) {
+        console.log("[ASMODEUS] Battlefield too crowded to summon him right now.");
+        return;
+    }
 
-    let w = 400 * imagesScale;
-    let h = 400 * imagesScale;
+    let w = 400 * ASMODEUS_SCALE_MULTIPLIER * imagesScale;
+    let h = 400 * ASMODEUS_SCALE_MULTIPLIER * imagesScale;
 
     let asmodeusBoss = new Component(
         w, h,
-        "images/boss/demon-lord.png",
+        ASMODEUS_SPRITE,
         1280 + w,
         360 - (h / 2),
         "image"
     );
 
     let currentRound = (window.RoundManager && window.RoundManager.round) || 1;
-    asmodeusBoss.maxHp = 40 + (currentRound * 15);
+    asmodeusBoss.maxHp = 60 + (currentRound * 20);
     asmodeusBoss.hp = asmodeusBoss.maxHp;
     asmodeusBoss.isBoss = true;
     asmodeusBoss.isAsmodeus = true;
+    asmodeusBoss.enemyType = 'asmodeus';
 
     enemies.push(asmodeusBoss);
     enemiesWaitTime.push(5);
@@ -223,5 +221,21 @@ function spawnAsmodeusBoss() {
     enemiesPlayerCollision.push(true);
 
     asmodeusAlive = true;
-    console.log("[ASMODEUS] A rare pact-boss has appeared!");
-}
+    console.log("[ASMODEUS] The pact-boss has appeared!");
+};
+
+setInterval(() => {
+    if (typeof enemies === 'undefined') return;
+
+    if (asmodeusAlive && !enemies.some(e => e && e.isAsmodeus)) {
+        asmodeusAlive = false;
+    }
+
+    if (!window.hasAsmodeus || asmodeusAlive || gameOver || window.playerDead) return;
+    if (window.NovelEngine && window.NovelEngine.isActive) return;
+    if (window.RoundManager && window.RoundManager.isBossRound()) return;
+
+    if (Math.random() < ASMODEUS_SPAWN_CHANCE) {
+        window.spawnAsmodeusBoss();
+    }
+}, ASMODEUS_CHECK_INTERVAL_MS);

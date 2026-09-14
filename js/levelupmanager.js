@@ -318,16 +318,22 @@ window.UpgradeManager = {
             }
         },
         asmodeus: {
-            name: "ASMODEUS",
-            cost: 300,
-            level: 0,
-            maxLevel: 1,
-            requirement: () => !!(window.PlayerStats && window.PlayerStats.kills >= 10),
-            apply() {
-                window.hasAsmodeus = true;
-                console.log("Asmodeus pact initialized");
-            }
+    name: "ASMODEUS",
+    cost: 300,
+    level: 0,
+    maxLevel: 1,
+    requirement: () => !!(window.PlayerStats && window.PlayerStats.kills >= 10),
+    apply() {
+        window.hasAsmodeus = true;
+        console.log("Asmodeus pact initialized");
+
+        // Buying the pact should visibly summon him, not just quietly
+        // enable a background chance check.
+        if (typeof window.spawnAsmodeusBoss === "function") {
+            window.spawnAsmodeusBoss();
         }
+    }
+}
     },
 
     open() {

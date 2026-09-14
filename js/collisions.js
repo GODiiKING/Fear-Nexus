@@ -3,16 +3,12 @@
 // ==========================================
 // BULLET MOVEMENT
 // ==========================================
-
 function updateBullets() {
-
-    // Stop bullets completely during story or when dead
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
     if (bulletActive) {
-
         let bullet1Turn = ((Math.random()) * 3) * Math.PI / 180;
         let bullet2Turn = 0;
         let bullet3Turn = ((Math.random() - 1) * 3) * Math.PI / 180;
@@ -33,18 +29,65 @@ function updateBullets() {
 }
 
 // ==========================================
-// BULLET HIT DETECTION (STABILITY PATCH)
+// SHARED ENEMY-DEATH RESOLUTION
+// Used by bullet hits AND by Sanguine Aura / Mana Zone / Astra in
+// upgradeeffects.js, so death handling (XP, souls, kill counters,
+// round tracking, array cleanup) only lives in one place.
+// ==========================================
+function resolveEnemyKill(i, source) {
+    if (!enemies[i]) return;
+
+    let isBoss = enemies[i].isBoss === true;
+    let isAsmodeus = enemies[i].isAsmodeus === true;
+
+    score += isBoss ? 10 : 1;
+
+    if (window.PlayerStats) {
+        if (isAsmodeus) {
+            window.PlayerStats.addSouls(200);
+            window.PlayerStats.addXP(window.PlayerStats.xpToNext);
+            console.log("[ASMODEUS] Pact-boss defeated - instant level up granted!");
+            if (typeof window.onAsmodeusDefeated === 'function') {
+                window.onAsmodeusDefeated();
+            }
+        } else {
+            window.PlayerStats.addXP(isBoss ? 25 : 5);
+            window.PlayerStats.addSouls(isBoss ? 100 : 50);
+        }
+
+        window.PlayerStats.kills = (window.PlayerStats.kills || 0) + 1;
+
+        if (source === 'square') {
+            window.PlayerStats.healthKills = (window.PlayerStats.healthKills || 0) + 1;
+        } else if (source === 'triangle') {
+            window.PlayerStats.magicKills = (window.PlayerStats.magicKills || 0) + 1;
+        }
+    }
+
+    if (window.RoundManager) {
+        // Asmodeus never counts toward clearing a boss round - he's a
+        // separate bonus spawn, not one of the two round bosses.
+        window.RoundManager.registerKill(isBoss && !isAsmodeus);
+    }
+
+    enemies.splice(i, 1);
+    enemiesWaitTime.splice(i, 1);
+    enemiesAnimationPosition.splice(i, 1);
+    enemiesPlayerCollision.splice(i, 1);
+}
+window.resolveEnemyKill = resolveEnemyKill;
+
+// ==========================================
+// BULLET HIT DETECTION
 // ==========================================
 function checkBulletCollisions() {
-
-    // Stop bullet hits during story or when dead
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
     for (let j = 0; j < bullets.length; j++) {
         for (let i = 0; i < enemies.length; i++) {
-            
+
             if (!enemies[i]) continue;
 
             let isHitX =
@@ -57,7 +100,6 @@ function checkBulletCollisions() {
 
             if (isHitX && isHitY) {
 
-                // Sounds
                 if (shootSound) {
                     try {
                         shootSound.pause();
@@ -80,46 +122,33 @@ function checkBulletCollisions() {
                     soundToPlay.play().catch(() => {});
                 }
 
-                // Damage enemy
-                enemies[i].hp -= 1;
+                // Damage - base 1, plus Horde Cleaver / Titan Slayer perk bonuses
+                let dmg = 1;
+                if (window.PlayerStats) {
+                    if (enemies[i].isBoss && window.PlayerStats.bossDamageBonus) {
+                        dmg += window.PlayerStats.bossDamageBonus;
+                    } else if (!enemies[i].isBoss && window.PlayerStats.mobDamageBonus) {
+                        dmg += window.PlayerStats.mobDamageBonus;
+                    }
+                }
+
+                enemies[i].hp -= dmg;
                 enemies[i].lastHitTime = Date.now();
 
-                // Lifesteal
                 if (window.hasLifesteal && player) {
                     let maxHpRef = player.maxHp || window.maxHealth || 100;
                     player.hp = Math.min(maxHpRef, player.hp + 5);
                     console.log("Lifesteal success: Restored 5 HP");
                 }
 
-                // Manasteal
                 if (window.hasManasteal && player) {
                     let maxMagicRef = player.maxMagic || window.maxMagic || 100;
                     player.magic = Math.min(maxMagicRef, player.magic + 5);
                     console.log("Manasteal success: Restored 5 Magic");
                 }
 
-                // Enemy death
                 if (enemies[i].hp <= 0) {
-
-                    let isBoss = enemies[i].isBoss === true;
-                    score += isBoss ? 10 : 1;
-
-                    if (window.PlayerStats) {
-                        window.PlayerStats.addXP(isBoss ? 25 : 5);
-                        window.PlayerStats.addSouls(isBoss ? 100 : 50);
-
-                        window.PlayerStats.healthKills = (window.PlayerStats.healthKills || 0) + 1;
-                        window.PlayerStats.magicKills = (window.PlayerStats.magicKills || 0) + 1;
-                    }
-
-                    if (window.RoundManager) {
-                        window.RoundManager.registerKill(isBoss);
-                    }
-
-                    enemies.splice(i, 1);
-                    enemiesWaitTime.splice(i, 1);
-                    enemiesAnimationPosition.splice(i, 1);
-                    enemiesPlayerCollision.splice(i, 1);
+                    resolveEnemyKill(i, window.activeBulletType);
                     i--;
                 }
 
@@ -131,14 +160,10 @@ function checkBulletCollisions() {
     }
 }
 
-
 // ==========================================
 // ENEMY TOUCHING PLAYER
 // ==========================================
-
 function checkEnemyPlayerCollisions() {
-
-    // Stop player damage during story or when dead
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
@@ -169,14 +194,28 @@ function checkEnemyPlayerCollisions() {
 
             if (currentTime - window.globalPlayerInvincibleTime > 2000) {
                 if (typeof player.hp !== 'undefined') {
-                    player.hp -= 10;
-                    if (player.hp < 0) {
-                        player.hp = 0;
-                        window.playerDead = true; // mark dead once HP hits 0
+
+                    // Cosmic Shell perk mitigation
+                    let rawDamage = 10;
+                    let mitigation = (window.PlayerStats && window.PlayerStats.damageMitigation) || 0;
+                    let finalDamage = Math.max(0, Math.round(rawDamage * (1 - mitigation)));
+
+                    player.hp -= finalDamage;
+
+                    if (player.hp <= 0) {
+                        if (window.hasRevival && !window.revivalConsumed) {
+                            window.revivalConsumed = true;
+                            let maxHpRef = (window.PlayerStats && window.PlayerStats.maxHealth) || window.maxHealth || 100;
+                            player.hp = Math.floor(maxHpRef * 0.5);
+                            console.log("[REVIVAL] Safety net triggered - restored " + player.hp + " HP");
+                        } else {
+                            player.hp = 0;
+                            window.playerDead = true;
+                        }
                     }
 
                     window.globalPlayerInvincibleTime = currentTime;
-                    console.log(`[DAMAGE APPLIED] Took 10 damage! New HP: ${player.hp}`);
+                    console.log(`[DAMAGE APPLIED] Took ${finalDamage} damage! New HP: ${player.hp}`);
                 }
             }
 
@@ -195,22 +234,16 @@ function checkEnemyPlayerCollisions() {
     }
 }
 
-
 // ==========================================
 // ENEMY MOVEMENT
 // ==========================================
-
 function moveEnemies() {
-
-    // Stop enemy movement during story or when dead
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
         return;
     }
 
     for (let i = 0; i < enemies.length; i++) {
-
         if (enemiesPlayerCollision[i]) {
-
             let dx = enemies[i].x - player.x;
             let dy = enemies[i].y - player.y;
 

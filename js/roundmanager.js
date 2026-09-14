@@ -24,7 +24,10 @@ window.RoundManager = {
 
         if (this.roundRequirements[this.round] === "boss") {
             if (isBoss) {
-                this.completeRound();
+                window.bossesRemainingThisRound = Math.max(0, (window.bossesRemainingThisRound || 1) - 1);
+                if (window.bossesRemainingThisRound <= 0) {
+                    this.completeRound();
+                }
             }
             return;
         }
@@ -41,6 +44,7 @@ window.RoundManager = {
 
         this.killsThisRound = 0;
         window.bossSpawnedThisRound = false;
+        window.bossesRemainingThisRound = 0;
 
         this.round++;
 
@@ -72,7 +76,6 @@ window.RoundManager = {
 
         if (this.round > 10) {
             console.log("VICTORY! You have completed all the testing rounds!");
-
             const victoryPanel = document.getElementById("victory-panel");
             if (victoryPanel) {
                 victoryPanel.classList.remove("hidden");
