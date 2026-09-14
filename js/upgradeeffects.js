@@ -177,7 +177,7 @@ function flashAstraScreen() {
 const ASMODEUS_SPRITE = "images/boss/asmodeus.png";
 const ASMODEUS_SCALE_MULTIPLIER = 1.4; // 40% bigger than demon-lord / nexial-lord
 const ASMODEUS_CHECK_INTERVAL_MS = 5000;
-const ASMODEUS_SPAWN_CHANCE = 0.15;
+const ASMODEUS_SPAWN_CHANCE = 1.0;
 let asmodeusAlive = false;
 
 window.onAsmodeusDefeated = function () {
@@ -192,7 +192,7 @@ window.spawnAsmodeusBoss = function () {
         console.log("[ASMODEUS] He's already here.");
         return;
     }
-    if (typeof enemies !== 'undefined' && enemies.length >= 8) {
+    if (typeof enemies !== 'undefined' && enemies.length >= 50) {
         console.log("[ASMODEUS] Battlefield too crowded to summon him right now.");
         return;
     }
