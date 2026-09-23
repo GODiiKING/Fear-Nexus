@@ -111,7 +111,7 @@ function startGame() {
     bullet3 = new Component(100, 2, "images/bullet/bullet1.png", -10, -2, "image");
 
     crosshair = new Component(40, 40, "images/crosshair/crosshair.png", 640, 360, "image");
-    restartScreen = new Component(1280, 720, "images/gameover/gameoverbg.png", 0, 0, "image");
+    restartScreen = new Component(1280, 720, "images/gameover/gameoverbg1.png", 0, 0, "image");
 
     bullets = [bullet1, bullet2, bullet3];
     grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];

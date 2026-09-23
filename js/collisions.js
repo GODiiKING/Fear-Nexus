@@ -1,7 +1,7 @@
 "use strict";
 
 // ==========================================
-// BULLET MOVEMENT
+// BULLET MOVEMENT (player bullets)
 // ==========================================
 function updateBullets() {
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
@@ -29,16 +29,43 @@ function updateBullets() {
 }
 
 // ==========================================
+// SHARED DAMAGE-TO-PLAYER HELPER
+// Used by both melee contact and enemy ranged bullets so Cosmic Shell
+// mitigation and Revival only need to be handled in one place.
+// ==========================================
+function applyDamageToPlayer(rawDamage) {
+    if (!player || typeof player.hp === 'undefined') return 0;
+
+    let mitigation = (window.PlayerStats && window.PlayerStats.damageMitigation) || 0;
+    let finalDamage = Math.max(0, Math.round(rawDamage * (1 - mitigation)));
+
+    player.hp -= finalDamage;
+
+    if (player.hp <= 0) {
+        if (window.hasRevival && !window.revivalConsumed) {
+            window.revivalConsumed = true;
+            let maxHpRef = (window.PlayerStats && window.PlayerStats.maxHealth) || window.maxHealth || 100;
+            player.hp = Math.floor(maxHpRef * 0.5);
+            console.log("[REVIVAL] Safety net triggered - restored " + player.hp + " HP");
+        } else {
+            player.hp = 0;
+            window.playerDead = true;
+        }
+    }
+
+    return finalDamage;
+}
+window.applyDamageToPlayer = applyDamageToPlayer;
+
+// ==========================================
 // SHARED ENEMY-DEATH RESOLUTION
-// Used by bullet hits AND by Sanguine Aura / Mana Zone / Astra in
-// upgradeeffects.js, so death handling (XP, souls, kill counters,
-// round tracking, array cleanup) only lives in one place.
 // ==========================================
 function resolveEnemyKill(i, source) {
     if (!enemies[i]) return;
 
     let isBoss = enemies[i].isBoss === true;
     let isAsmodeus = enemies[i].isAsmodeus === true;
+    let isSkryxSpecial = enemies[i].isSkryxSpecial === true;
 
     score += isBoss ? 10 : 1;
 
@@ -50,6 +77,10 @@ function resolveEnemyKill(i, source) {
             if (typeof window.onAsmodeusDefeated === 'function') {
                 window.onAsmodeusDefeated();
             }
+        } else if (isSkryxSpecial) {
+            window.PlayerStats.addXP(40);
+            window.PlayerStats.addSouls(150);
+            console.log("[SKRYX LORD] Special boss defeated!");
         } else {
             window.PlayerStats.addXP(isBoss ? 25 : 5);
             window.PlayerStats.addSouls(isBoss ? 100 : 50);
@@ -65,9 +96,9 @@ function resolveEnemyKill(i, source) {
     }
 
     if (window.RoundManager) {
-        // Asmodeus never counts toward clearing a boss round - he's a
-        // separate bonus spawn, not one of the two round bosses.
-        window.RoundManager.registerKill(isBoss && !isAsmodeus);
+        // Asmodeus and Skryx Lord are bonus encounters - they never gate
+        // clearing a scheduled boss round.
+        window.RoundManager.registerKill(isBoss && !isAsmodeus && !isSkryxSpecial);
     }
 
     enemies.splice(i, 1);
@@ -78,7 +109,7 @@ function resolveEnemyKill(i, source) {
 window.resolveEnemyKill = resolveEnemyKill;
 
 // ==========================================
-// BULLET HIT DETECTION
+// BULLET HIT DETECTION (player bullets vs enemies)
 // ==========================================
 function checkBulletCollisions() {
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
@@ -122,7 +153,6 @@ function checkBulletCollisions() {
                     soundToPlay.play().catch(() => {});
                 }
 
-                // Damage - base 1, plus Horde Cleaver / Titan Slayer perk bonuses
                 let dmg = 1;
                 if (window.PlayerStats) {
                     if (enemies[i].isBoss && window.PlayerStats.bossDamageBonus) {
@@ -138,13 +168,11 @@ function checkBulletCollisions() {
                 if (window.hasLifesteal && player) {
                     let maxHpRef = player.maxHp || window.maxHealth || 100;
                     player.hp = Math.min(maxHpRef, player.hp + 5);
-                    console.log("Lifesteal success: Restored 5 HP");
                 }
 
                 if (window.hasManasteal && player) {
                     let maxMagicRef = player.maxMagic || window.maxMagic || 100;
                     player.magic = Math.min(maxMagicRef, player.magic + 5);
-                    console.log("Manasteal success: Restored 5 Magic");
                 }
 
                 if (enemies[i].hp <= 0) {
@@ -161,7 +189,7 @@ function checkBulletCollisions() {
 }
 
 // ==========================================
-// ENEMY TOUCHING PLAYER
+// ENEMY MELEE TOUCHING PLAYER
 // ==========================================
 function checkEnemyPlayerCollisions() {
     if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
@@ -194,28 +222,9 @@ function checkEnemyPlayerCollisions() {
 
             if (currentTime - window.globalPlayerInvincibleTime > 2000) {
                 if (typeof player.hp !== 'undefined') {
-
-                    // Cosmic Shell perk mitigation
-                    let rawDamage = 10;
-                    let mitigation = (window.PlayerStats && window.PlayerStats.damageMitigation) || 0;
-                    let finalDamage = Math.max(0, Math.round(rawDamage * (1 - mitigation)));
-
-                    player.hp -= finalDamage;
-
-                    if (player.hp <= 0) {
-                        if (window.hasRevival && !window.revivalConsumed) {
-                            window.revivalConsumed = true;
-                            let maxHpRef = (window.PlayerStats && window.PlayerStats.maxHealth) || window.maxHealth || 100;
-                            player.hp = Math.floor(maxHpRef * 0.5);
-                            console.log("[REVIVAL] Safety net triggered - restored " + player.hp + " HP");
-                        } else {
-                            player.hp = 0;
-                            window.playerDead = true;
-                        }
-                    }
-
+                    let dmg = applyDamageToPlayer(10);
                     window.globalPlayerInvincibleTime = currentTime;
-                    console.log(`[DAMAGE APPLIED] Took ${finalDamage} damage! New HP: ${player.hp}`);
+                    console.log(`[DAMAGE APPLIED] Took ${dmg} damage! New HP: ${player.hp}`);
                 }
             }
 
@@ -235,28 +244,34 @@ function checkEnemyPlayerCollisions() {
 }
 
 // ==========================================
-// ENEMY MOVEMENT
+// ENEMY RANGED BULLETS vs PLAYER (new)
 // ==========================================
-function moveEnemies() {
-    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) {
-        return;
-    }
+function checkEnemyBulletPlayerCollisions() {
+    if ((window.NovelEngine && window.NovelEngine.isActive) || window.playerDead === true) return;
+    if (!player || typeof enemyBullets === 'undefined') return;
 
-    for (let i = 0; i < enemies.length; i++) {
-        if (enemiesPlayerCollision[i]) {
-            let dx = enemies[i].x - player.x;
-            let dy = enemies[i].y - player.y;
+    let px = player.x + (player.width || 0) / 2;
+    let py = player.y + (player.height || 0) / 2;
+    let hitRadius = 55 * imagesScale;
 
-            let angleToPlayer = Math.atan2(dy, dx);
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        let b = enemyBullets[i];
+        let dx = b.x - px;
+        let dy = b.y - py;
+        let dist = Math.sqrt(dx * dx + dy * dy);
 
-            enemies[i].angle = angleToPlayer + Math.PI;
-
-            enemies[i].x -= movementSpeed * 5 * Math.cos(angleToPlayer);
-            enemies[i].y -= movementSpeed * 5 * Math.sin(angleToPlayer);
-
-            if (typeof enemyMovementAnimationFunction === 'function') {
-                enemyMovementAnimationFunction(i);
-            }
+        if (dist < hitRadius) {
+            let dmg = applyDamageToPlayer(b.damage);
+            console.log(`[ENEMY RANGED HIT] Took ${dmg} damage from ${b.enemyType}`);
+            enemyBullets.splice(i, 1);
         }
     }
 }
+window.checkEnemyBulletPlayerCollisions = checkEnemyBulletPlayerCollisions;
+
+// ==========================================
+// ENEMY MOVEMENT
+// (kept here for reference - the actual movement/AI logic now lives in
+// enemy.js's moveEnemies(), which is what actually runs since enemy.js
+// loads after this file)
+// ==========================================
