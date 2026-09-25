@@ -65,6 +65,13 @@ function Component(width, height, source, x, y, type, angle = 0) {
                     enemies[i].y -= movementSpeed * Math.sin(player.angle);
                 }
 
+                if (typeof npcs !== 'undefined') {
+                    for (let i = 0; i < npcs.length; i++) {
+                        npcs[i].x -= movementSpeed * Math.cos(player.angle);
+                        npcs[i].y -= movementSpeed * Math.sin(player.angle);
+                    }
+                }
+
                 if (grassArray[4].x + currentMaxX > currentMaxX) {
                     moveLeft();
                     currentMaxX += 1280;
@@ -104,6 +111,13 @@ function Component(width, height, source, x, y, type, angle = 0) {
                 for (let i = 0; i < enemies.length; i++) {
                     enemies[i].x += movementSpeed * Math.cos(player.angle);
                     enemies[i].y += movementSpeed * Math.sin(player.angle);
+                }
+
+                if (typeof npcs !== 'undefined') {
+                    for (let i = 0; i < npcs.length; i++) {
+                        npcs[i].x += movementSpeed * Math.cos(player.angle);
+                        npcs[i].y += movementSpeed * Math.sin(player.angle);
+                    }
                 }
 
                 if (grassArray[4].x + currentMaxX > currentMaxX) {

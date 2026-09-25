@@ -138,21 +138,21 @@
     <p class="reward-desc">Every second health ability activates a specialized visual aura that damages all nearby enemies</p>
     <div id="level-sanguineAura" class="badge-rank">Rank: 0/1</div>
     <div id="cost-sanguineAura" class="badge-cost">200 Souls</div>
-  </div>
+</div>
 
-  <div id="card-manaZone" class="reward-card" onclick="UpgradeManager.selectUpgrade('manaZone')">
+<div id="card-manaZone" class="reward-card" onclick="UpgradeManager.selectUpgrade('manaZone')">
     <h2 class="reward-title">MANA ZONE</h2>
     <p class="reward-desc">Remaining stationary for three seconds generates a continuous localized field of automated projectiles</p>
     <div id="level-manaZone" class="badge-rank">Rank: 0/1</div>
     <div id="cost-manaZone" class="badge-cost">200 Souls</div>
-  </div>
+</div>
 
-  <div id="card-astra" class="reward-card" onclick="UpgradeManager.selectUpgrade('astra')">
+<div id="card-astra" class="reward-card" onclick="UpgradeManager.selectUpgrade('astra')">
     <h2 class="reward-title">ASTRA</h2>
-    <p class="reward-desc">Unlocks your powerful right click special attack to unleash catastrophic celestial damage</p>
+    <p class="reward-desc">Unlocks your powerful right click special attack to unleash catastrophic celestial damage. Right click does nothing until this is purchased.</p>
     <div id="level-astra" class="badge-rank">Rank: 0/1</div>
     <div id="cost-astra" class="badge-cost">250 Souls</div>
-  </div>
+</div>
 
   <div id="card-asmodeus" class="reward-card" onclick="UpgradeManager.selectUpgrade('asmodeus')">
     <h2 class="reward-title">ASMODEUS</h2>
@@ -241,6 +241,17 @@
         </div>
     </div>
 
+    <div id="npc-dialogue-panel" class="hidden">
+        <div class="panel-wrapper container">
+            <h1 class="panel-title" id="npc-dialogue-name">NPC</h1>
+            <p class="panel-subtitle" id="npc-dialogue-prompt">...</p>
+
+            <div id="npc-dialogue-options" class="npc-options-wrapper"></div>
+
+            <p class="footer-note" id="npc-dialogue-result"></p>
+        </div>
+    </div>
+
 <script src="js/config.js"></script>
 <script src="js/playerstats.js"></script>
 <script src="js/novelengine.js"></script>
@@ -252,6 +263,7 @@
 <script src="js/enemy.js"></script>
 <script src="js/collisions.js"></script>
 <script src="js/upgradeeffects.js"></script>
+<script src="js/npc.js"></script>
 <script src="js/bulletsprites.js"></script>
 <script src="js/character.js"></script>
 <script src="js/game.js"></script>

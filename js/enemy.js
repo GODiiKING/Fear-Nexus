@@ -3,10 +3,6 @@
 // ==========================================
 // ENEMY TYPE DEFINITIONS
 // ==========================================
-// ASSUMPTION: gharrox/grint/lumen/murm/skryx follow the same folder
-// convention and frame counts as demon/nexial (16 movement frames 0-15,
-// 8 attack frames 0-7) and the same sprite dimensions. If any of that
-// differs, this table is the only place to change it.
 const ENEMY_TYPES = {
     demon: {
         movementFrames: 16, attackFrames: 8,
@@ -59,8 +55,6 @@ const ENEMY_TYPES = {
     }
 };
 
-// Skryx Lord makes an independent special appearance every N rounds,
-// on top of whatever the normal round schedule already spawns.
 const SKRYX_BOSS_CYCLE = 3;
 
 // ==========================================
@@ -105,6 +99,13 @@ Object.keys(ENEMY_TYPES).forEach(function (typeName) {
     enemyAnimations[typeName] = { movement: movement, attack: attack };
 });
 
+// Enemy projectiles reuse your bullet2.png art, tinted per-type via
+// canvas hue-rotate so they read as distinct without needing new sprites.
+var enemyBulletImage = new Image();
+var enemyBulletImageLoaded = false;
+enemyBulletImage.onload = function () { enemyBulletImageLoaded = true; };
+enemyBulletImage.src = "images/bullet/bullet2.png";
+
 // ==========================================
 // ENEMY LOGIC & SPAWNING
 // ==========================================
@@ -126,8 +127,6 @@ function spawnEnemy() {
     }
 }
 
-// Independent Skryx Lord check - fires at most once per qualifying round,
-// regardless of whether that round is also a scheduled boss round.
 function maybeSpawnSkryxLord() {
     if (!window.RoundManager) return;
 
@@ -236,9 +235,6 @@ function getRandomInterval() {
 
 // ==========================================
 // ENEMY MOVEMENT AI
-// Seek-the-player + separation from nearby enemies (so they spread out
-// instead of stacking when the player stands still) + a gentle per-enemy
-// wobble so paths aren't identical + per-enemy speed variance.
 // ==========================================
 const SEPARATION_RADIUS = 120;
 const SEPARATION_WEIGHT = 1.6;
@@ -261,11 +257,9 @@ function moveEnemies() {
         let dy = enemy.y - player.y;
         let distToPlayer = Math.sqrt(dx * dx + dy * dy) || 1;
 
-        // Sprite still faces the player directly (unchanged visual behavior)
         let angleToPlayer = Math.atan2(dy, dx);
         enemy.angle = angleToPlayer + Math.PI;
 
-        // --- Blend seek + separation + wobble for actual movement ---
         let seekX = -dx / distToPlayer;
         let seekY = -dy / distToPlayer;
 
@@ -356,23 +350,75 @@ function updateEnemyBullets() {
     }
 }
 
-// Placeholder visuals - swap for real projectile art anytime by drawing
-// an image here instead of an arc.
-const ENEMY_BULLET_COLORS = {
-    lumen: '#ffe066',
-    murm: '#a06bff',
-    skryx: '#00e5c7'
+// Hue-rotate applied to the real bullet sprite so each ranged type's
+// shots read as distinct without new art. Tune the angles below if the
+// tint looks off against your actual bullet2.png color.
+const ENEMY_BULLET_HUE = {
+    lumen: '10deg',
+    murm: '250deg',
+    skryx: '150deg'
 };
 
 function drawEnemyBullets(ctx) {
     for (let i = 0; i < enemyBullets.length; i++) {
         let b = enemyBullets[i];
         ctx.save();
-        ctx.fillStyle = ENEMY_BULLET_COLORS[b.enemyType] || '#ff4444';
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 8;
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.angle);
+
+        if (enemyBulletImageLoaded) {
+            ctx.filter = 'hue-rotate(' + (ENEMY_BULLET_HUE[b.enemyType] || '0deg') + ') saturate(1.4)';
+            ctx.drawImage(enemyBulletImage, -14, -4, 28, 8);
+        } else {
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.arc(0, 0, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+}
+
+// ==========================================
+// BOSS AURA
+// Pulsing glow behind boss sprites so bosses read at a glance, colored
+// per type. Drawn before the boss sprite itself in the render loop.
+// ==========================================
+const BOSS_AURA_PULSE_MS = 1400;
+const BOSS_AURA_COLORS = {
+    demon: '255,60,60',
+    nexial: '255,150,0',
+    skryx: '0,229,199'
+};
+
+function bossAuraColor(enemy) {
+    if (enemy.isAsmodeus) return '176,86,255';
+    return BOSS_AURA_COLORS[enemy.enemyType] || '255,60,60';
+}
+
+function drawBossAuras(ctx) {
+    const now = Date.now();
+
+    for (let i = 0; i < enemies.length; i++) {
+        let enemy = enemies[i];
+        if (!enemy.isBoss) continue;
+
+        let cx = enemy.x + (enemy.width || 0) / 2;
+        let cy = enemy.y + (enemy.height || 0) / 2;
+        let baseRadius = Math.max(enemy.width || 0, enemy.height || 0) / 2 + 15;
+        let pulse = (Math.sin((now / BOSS_AURA_PULSE_MS) * Math.PI * 2) + 1) / 2;
+        let radius = baseRadius + pulse * 10;
+        let color = bossAuraColor(enemy);
+
+        ctx.save();
+        let gradient = ctx.createRadialGradient(cx, cy, radius * 0.4, cx, cy, radius);
+        gradient.addColorStop(0, 'rgba(' + color + ', 0)');
+        gradient.addColorStop(0.7, 'rgba(' + color + ', 0.28)');
+        gradient.addColorStop(1, 'rgba(' + color + ', 0)');
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }

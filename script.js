@@ -5,7 +5,7 @@
 // ==========================================
 
 let lastStoryClickTime = 0;
-const STORY_CLICK_DELAY = 350; // Cooldown duration measured in milliseconds
+const STORY_CLICK_DELAY = 350;
 
 let GameArea = {
     canvas: document.createElement("canvas"),
@@ -16,7 +16,6 @@ let GameArea = {
         this.context = this.canvas.getContext("2d");
         clearInterval(this.interval);
 
-        // Only start the game loop if NOT in a story scene
         if (!window.StoryManager || !window.StoryManager.isActive) {
             this.interval = setInterval(updateGameArea, 20);
         }
@@ -24,17 +23,12 @@ let GameArea = {
         this.canvas.id = "GameWindow";
 
         let container = document.getElementById("gamecontainer");
-        if (!container) container = document.getElementById("game-container"); 
+        if (!container) container = document.getElementById("game-container");
         container.insertBefore(this.canvas, container.firstChild);
     },
 
     clear: function () {
-        this.context.clearRect(
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height
-        );
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 };
 
@@ -44,22 +38,16 @@ let GameArea = {
 
 function startGame() {
 
-    // ⭐ FIX: Start canvas FIRST
     GameArea.start();
 
-    // ⭐ FIX: Start story SECOND using NovelEngine instead of StoryManager
     if (window.NovelEngine) {
         window.NovelEngine.startScene("scene1");
     }
 
-    // ⭐ FIX: DO NOT start game loop again
-    // (GameArea.start already did it, and NovelEngine paused it)
-
-    // FIX: Only show combat UI if a narrative scene is not active
     if (!window.NovelEngine || !window.NovelEngine.isActive) {
         showUI();
     }
-    
+
     player = new Component(
         313 * imagesScale,
         207 * imagesScale,
@@ -70,20 +58,19 @@ function startGame() {
         0
     );
 
-    // Keyboard listeners
     window.addEventListener("keydown", function(e) {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
             return;
         }
 
         console.log("Keyboard activity detected: " + e.key);
-        
+
         if (e.key === '1' || e.key === '2') {
             if (window.abilitySystem) {
                 window.abilitySystem.handleKey(e.key);
             }
         }
-        
+
         if (e.key === 'z' || e.key === 'Z') {
             if (window.UpgradeManager) window.UpgradeManager.toggleStore();
         }
@@ -116,8 +103,8 @@ function startGame() {
     bullets = [bullet1, bullet2, bullet3];
     grassArray = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8, grass9];
     enemies = [];
+    if (typeof enemyBullets !== 'undefined') enemyBullets = [];
 
-    // ⭐ FIX: Only spawn enemies if story is NOT active
     if (!window.NovelEngine || !window.NovelEngine.isActive) {
         spawnEnemiesInterval = setInterval(spawnEnemy, getRandomInterval());
     }
@@ -128,7 +115,7 @@ function startGame() {
     window.addEventListener("keydown", handleMovementPress);
     window.addEventListener("keyup", handleMovementRelease);
     window.addEventListener("contextmenu", (e) => e.preventDefault());
-    
+
     window.addEventListener("mousemove", function (e) {
         let rect = GameArea.canvas.getBoundingClientRect();
         angle = Math.atan2(
@@ -139,9 +126,8 @@ function startGame() {
         crosshair.x = e.clientX - rect.left - 20;
         crosshair.y = e.clientY - rect.top - 17;
     });
-    
+
     window.addEventListener("mousedown", (e) => {
-        // FIX: Route mouse clicks to NovelEngine
         if (window.NovelEngine && window.NovelEngine.isActive) {
             if (e.button === 0) {
                 let currentTime = Date.now();
@@ -150,7 +136,7 @@ function startGame() {
                     window.NovelEngine.advanceLine();
                 }
             }
-            return; 
+            return;
         }
 
         if (gameOver) return;
@@ -158,14 +144,12 @@ function startGame() {
 
         if (e.button === 0) {
             Shoot(e);
-        } 
-        else if (e.button === 2) {
-            if (player.magic >= 10) {
-                player.magic -= 10; 
-                let fakeLeftClickEvent = { button: 0, clientX: e.clientX, clientY: e.clientY };
-                Shoot(fakeLeftClickEvent); 
-            }
         }
+        // Right-click used to fire a cheap magic-cost shot here. That's
+        // now Astra's job: see the 'contextmenu' listener in
+        // upgradeeffects.js, which does nothing at all until
+        // window.hasAstra is true, so right-click is fully locked until
+        // the Astra perk is purchased.
     });
 }
 
@@ -174,7 +158,6 @@ function startGame() {
 // ==========================================
 
 function updateGameArea() {
-    // ⭐ FIX: If story is active, STOP everything
     if (window.StoryManager && window.StoryManager.isActive) {
         window.StoryManager.update();
         return;
@@ -188,9 +171,12 @@ function updateGameArea() {
     updateBullets();
     checkBulletCollisions();
     checkEnemyPlayerCollisions();
-    
+    updateEnemyBullets();
+    if (typeof checkEnemyBulletPlayerCollisions === 'function') checkEnemyBulletPlayerCollisions();
+    if (typeof updateNPCSpawning === 'function') updateNPCSpawning();
+
     runPassiveRegeneration();
-    runStorePassiveUpgrades(); 
+    runStorePassiveUpgrades();
 
     if (typeof abilitySystem !== 'undefined' && abilitySystem.debugText) {
         ctx.fillStyle = "white";
@@ -199,25 +185,32 @@ function updateGameArea() {
     }
 
     grassArray.forEach(grass => grass.update());
+
+    if (typeof drawNPCs === 'function') drawNPCs(ctx);
+
     player.update();
     bullets.forEach(bullet => bullet.update());
     crosshair.update();
+
+    if (typeof drawBossAuras === 'function') drawBossAuras(ctx);
 
     for (let i = 0; i < enemies.length; i++) {
         enemies[i].update();
     }
 
+    if (typeof drawEnemyBullets === 'function') drawEnemyBullets(ctx);
+
     drawEnemyHealthBars(ctx);
     if (typeof updateUI === "function") updateUI();
 
-    ctx.textAlign = "center"; 
+    ctx.textAlign = "center";
 
     if (window.RoundManager) {
         let currentRound = window.RoundManager.round;
         let req = window.RoundManager.roundRequirements[currentRound];
-        
-        ctx.fillStyle = "#ff0000"; 
-        ctx.font = "bold 20px Arial"; 
+
+        ctx.fillStyle = "#ff0000";
+        ctx.font = "bold 20px Arial";
 
         if (req === "boss") {
             ctx.fillText("ROUND " + currentRound + " SCOUTING ENEMY BOSS ENCOUNTER", 640, 60);
@@ -227,13 +220,22 @@ function updateGameArea() {
         }
     }
 
+    if (typeof getNearbyNPC === 'function') {
+        let nearNpc = getNearbyNPC();
+        if (nearNpc) {
+            ctx.fillStyle = "#ffe066";
+            ctx.font = "bold 18px Arial";
+            ctx.fillText("Press SPACE to talk to " + nearNpc.name, 640, 630);
+        }
+    }
+
     if (player && player.hp <= 0 && !gameOver) {
         if (window.hasRevival) {
-            window.hasRevival = false; 
-            
+            window.hasRevival = false;
+
             let maxHpRef = player.maxHp || window.maxHealth || 100;
-            player.hp = Math.floor(maxHpRef * 0.5); 
-            
+            player.hp = Math.floor(maxHpRef * 0.5);
+
             if (window.playerHealth !== undefined) {
                 window.playerHealth = player.hp;
             }
@@ -244,7 +246,7 @@ function updateGameArea() {
 
     if (gameOver) {
         restartScreen.update();
-        ctx.fillStyle = "#ffffff"; 
+        ctx.fillStyle = "#ffffff";
         ctx.fillText("High Score: " + highscore.toString(), 640, 650);
     }
 }
@@ -273,169 +275,25 @@ function showUI() {
     if(document.querySelector('.xp-group')) document.querySelector('.xp-group').classList.remove('hidden');
 }
 
-// ==========================================
-// BULLETPROOF ENEMY HEALTH BAR RENDERING
-// ==========================================
-
-function drawEnemyHealthBars(ctx) {
-    const currentTime = Date.now();
-
-    for (let i = 0; i < enemies.length; i++) {
-        let enemy = enemies[i];
-
-        if (enemy.maxHp === undefined || isNaN(enemy.maxHp)) {
-            let currentKills = typeof score !== 'undefined' ? score : 0;
-            enemy.maxHp = 2 + Math.floor(currentKills / 10);
-        }
-        if (enemy.hp === undefined || isNaN(enemy.hp)) {
-            enemy.hp = enemy.maxHp;
-        }
-
-        if (enemy.lastHitTime && (currentTime - enemy.lastHitTime < 3000)) {
-            const barWidth = 50;  
-            const barHeight = 5;  
-            
-            let healthPercentage = enemy.hp / enemy.maxHp;
-            let currentBarWidth = barWidth * healthPercentage;
-            
-            let enemyWidth = enemy.width || (288 * imagesScale);
-            
-            const barX = enemy.x + (enemyWidth / 2) - (barWidth / 2);
-            const barY = enemy.y - 15; 
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillRect(barX, barY, barWidth, barHeight);
-            
-            ctx.fillStyle = '#ff0000'; 
-            ctx.fillRect(barX, barY, currentBarWidth, barHeight);
-        }
-    }
-}
-
-// ==========================================
-// PASSIVE REGENERATION SYSTEM (PERK HOOKS)
-// ==========================================
-
-let passiveRegenTimer = 0;
-
-function runPassiveRegeneration() {
-    let statsSource = window.PlayerStats;
-    if (!statsSource || gameOver) return;
-
-    if ((statsSource.healthRegen && statsSource.healthRegen > 0) || 
-        (statsSource.magicRegen && statsSource.magicRegen > 0)) {
-        
-        passiveRegenTimer++;
-
-        if (passiveRegenTimer >= 250) { 
-            passiveRegenTimer = 0;
-            let needsVisualRefresh = false;
-
-            if (statsSource.healthRegen && statsSource.healthRegen > 0) {
-                if (playerHealth < maxHealth) {
-                    playerHealth = Math.min(maxHealth, playerHealth + statsSource.healthRegen);
-                    if (player) player.hp = playerHealth; 
-                    needsVisualRefresh = true;
-                    console.log("[PERK REGEN] Restored " + statsSource.healthRegen + " HP. Current: " + playerHealth);
-                }
-            }
-
-            if (statsSource.magicRegen && statsSource.magicRegen > 0) {
-                if (playerMagic < maxMagic) {
-                    playerMagic = Math.min(maxMagic, playerMagic + statsSource.magicRegen);
-                    if (player) player.magic = playerMagic; 
-                    needsVisualRefresh = true;
-                    console.log("[PERK REGEN] Restored " + statsSource.magicRegen + " MAGIC. Current: " + playerMagic);
-                }
-            }
-
-            if (needsVisualRefresh && typeof updateUI === "function") {
-                updateUI();
-            }
-        }
-    }
-}
-
-// ==========================================
-// PASSIVE STORE UPGRADE PROCESSING HOOKS
-// ==========================================
+// NOTE: script.js used to also have its own copies of
+// drawEnemyHealthBars(), passiveRegenTimer/runPassiveRegeneration(), and
+// a full duplicate Sanguine Aura / Mana Zone implementation inside
+// runStorePassiveUpgrades(). Because enemy.js, game.js, and
+// upgradeeffects.js load after this file, their versions were always the
+// ones actually running - these were dead code. Removed to avoid two
+// people editing the wrong copy later. runStorePassiveUpgrades() is kept
+// as a no-op below only because updateGameArea() (in this same file)
+// still calls it by name.
 
 function runStorePassiveUpgrades() {
-    if (!player || gameOver) return;
-
-    if (window.hasSanguineAura && enemies.length > 0) {
-        if (!window.auraTimer) window.auraTimer = 0;
-        window.auraTimer++;
-
-        if (window.auraTimer >= 15) {
-            window.auraTimer = 0;
-            
-            let auraRadius = 160;
-            let auraDamage = 1;
-
-            for (let i = 0; i < enemies.length; i++) {
-                let enemy = enemies[i];
-                let dx = enemy.x - player.x;
-                let dy = enemy.y - player.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < auraRadius) {
-                    enemy.hp -= auraDamage;
-                    enemy.lastHitTime = Date.now();
-
-                    let maxHpRef = player.maxHp || window.maxHealth || 100;
-                    player.hp = Math.min(maxHpRef, player.hp + 0.2);
-                    if (window.playerHealth !== undefined) window.playerHealth = player.hp;
-
-                    if (enemy.hp <= 0) {
-                        let isBoss = (enemy.hasOwnProperty('isBoss') && enemy.isBoss);
-                        score += isBoss ? 10 : 1;
-
-                        if (window.PlayerStats) {
-                            window.PlayerStats.addXP(isBoss ? 25 : 5);
-                            window.PlayerStats.addSouls(isBoss ? 100 : 50);
-                        }
-
-                        enemies.splice(i, 1);
-                        if(typeof enemiesWaitTime !== 'undefined') enemiesWaitTime.splice(i, 1);
-                        if(typeof enemiesAnimationPosition !== 'undefined') enemiesAnimationPosition.splice(i, 1);
-                        if(typeof enemiesPlayerCollision !== 'undefined') enemiesPlayerCollision.splice(i, 1);
-                        i--;
-                    }
-                }
-            }
-        }
-    }
-
-    if (window.hasManaZone) {
-        if (window.lastTrackedX === undefined) {
-            window.lastTrackedX = player.x;
-            window.lastTrackedY = player.y;
-            window.stillFramesCounter = 0;
-        }
-
-        if (player.x === window.lastTrackedX && player.y === window.lastTrackedY) {
-            window.stillFramesCounter++;
-            
-            if (window.stillFramesCounter >= 30) {
-                let maxMagicRef = player.maxMagic || window.maxMagic || 100;
-                player.magic = Math.min(maxMagicRef, player.magic + 0.4);
-                if (window.playerMagic !== undefined) window.playerMagic = player.magic;
-            }
-        } else {
-            window.stillFramesCounter = 0;
-        }
-
-        window.lastTrackedX = player.x;
-        window.lastTrackedY = player.y;
-    }
+    // Sanguine Aura and Mana Zone are fully handled in upgradeeffects.js
+    // now (ability-cast-triggered and genuine-stillness-triggered
+    // respectively), both routed through resolveEnemyKill() so kills
+    // properly count toward round progress and kill-based perks.
 }
 
-const gameContainer = document.getElementById('game-container'); // Or your canvas ID
+const gameContainer = document.getElementById('game-container');
 
-// Stop the context menu (right click)
 document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-// Stop text selection and drag events
 document.addEventListener('selectstart', (e) => e.preventDefault());
 document.addEventListener('dragstart', (e) => e.preventDefault());

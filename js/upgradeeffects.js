@@ -57,11 +57,31 @@ function flashSanguineAura() {
     flash.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     container.appendChild(flash);
 
+    const icon = document.createElement('img');
+    icon.src = 'images/sanguine-aura.png';
+    icon.style.position = 'absolute';
+    icon.style.left = '50%';
+    icon.style.top = '50%';
+    icon.style.width = '90px';
+    icon.style.height = '90px';
+    icon.style.marginLeft = '-45px';
+    icon.style.marginTop = '-45px';
+    icon.style.pointerEvents = 'none';
+    icon.style.zIndex = '401';
+    icon.style.opacity = '0.95';
+    icon.style.transform = 'scale(0.5)';
+    icon.style.filter = 'drop-shadow(0 0 12px rgba(255,51,102,0.8))';
+    icon.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    container.appendChild(icon);
+
     requestAnimationFrame(() => {
         flash.style.opacity = '0';
         flash.style.transform = 'scale(1)';
+        icon.style.transform = 'scale(1.15)';
     });
-    setTimeout(() => flash.remove(), 350);
+    setTimeout(() => { flash.remove(); }, 350);
+    setTimeout(() => { icon.style.opacity = '0'; }, 250);
+    setTimeout(() => { icon.remove(); }, 650);
 }
 
 window.triggerSanguineAura = function () {
@@ -73,6 +93,8 @@ window.triggerSanguineAura = function () {
 
 // ==========================================
 // MANA ZONE - stand still 3s, field ticks every 0.5s
+// Shows a persistent pulsing icon over the player for as long as the
+// zone is active, using your mana-zone.png sprite.
 // ==========================================
 const MANA_ZONE_TRIGGER_MS = 3000;
 const MANA_ZONE_TICK_MS = 500;
@@ -83,39 +105,81 @@ const MANA_ZONE_POLL_MS = 100;
 let manaZoneStationaryTimer = 0;
 let manaZoneActive = false;
 let manaZoneTickTimer = 0;
+let manaZoneWasActive = false;
+let manaZoneIconEl = null;
+
+function showManaZoneIcon() {
+    if (manaZoneIconEl) return;
+    const container = document.getElementById('game-container');
+    if (!container) return;
+
+    const size = MANA_ZONE_RADIUS * 1.3;
+    const icon = document.createElement('img');
+    icon.src = 'images/mana-zone.png';
+    icon.style.position = 'absolute';
+    icon.style.left = '50%';
+    icon.style.top = '50%';
+    icon.style.width = size + 'px';
+    icon.style.height = size + 'px';
+    icon.style.marginLeft = (-size / 2) + 'px';
+    icon.style.marginTop = (-size / 2) + 'px';
+    icon.style.pointerEvents = 'none';
+    icon.style.zIndex = '399';
+    icon.style.opacity = '0.55';
+    icon.style.filter = 'drop-shadow(0 0 14px rgba(51,204,255,0.7))';
+    icon.style.animation = 'manaZonePulse 1.6s ease-in-out infinite';
+    container.appendChild(icon);
+
+    manaZoneIconEl = icon;
+}
+
+function hideManaZoneIcon() {
+    if (manaZoneIconEl) {
+        manaZoneIconEl.remove();
+        manaZoneIconEl = null;
+    }
+}
 
 setInterval(() => {
     if (!window.hasManaZone || gameOver || window.playerDead) {
         manaZoneStationaryTimer = 0;
         manaZoneActive = false;
-        return;
-    }
-    if (window.NovelEngine && window.NovelEngine.isActive) return;
+    } else if (!(window.NovelEngine && window.NovelEngine.isActive)) {
+        const isStationary = !moveForward && !moveBackwards;
 
-    const isStationary = !moveForward && !moveBackwards;
-
-    if (isStationary) {
-        manaZoneStationaryTimer += MANA_ZONE_POLL_MS;
-        if (manaZoneStationaryTimer >= MANA_ZONE_TRIGGER_MS) {
-            manaZoneActive = true;
-        }
-    } else {
-        manaZoneStationaryTimer = 0;
-        manaZoneActive = false;
-        manaZoneTickTimer = 0;
-    }
-
-    if (manaZoneActive) {
-        manaZoneTickTimer += MANA_ZONE_POLL_MS;
-        if (manaZoneTickTimer >= MANA_ZONE_TICK_MS) {
+        if (isStationary) {
+            manaZoneStationaryTimer += MANA_ZONE_POLL_MS;
+            if (manaZoneStationaryTimer >= MANA_ZONE_TRIGGER_MS) {
+                manaZoneActive = true;
+            }
+        } else {
+            manaZoneStationaryTimer = 0;
+            manaZoneActive = false;
             manaZoneTickTimer = 0;
-            damageEnemiesInRadius(MANA_ZONE_RADIUS, MANA_ZONE_DAMAGE);
+        }
+
+        if (manaZoneActive) {
+            manaZoneTickTimer += MANA_ZONE_POLL_MS;
+            if (manaZoneTickTimer >= MANA_ZONE_TICK_MS) {
+                manaZoneTickTimer = 0;
+                damageEnemiesInRadius(MANA_ZONE_RADIUS, MANA_ZONE_DAMAGE);
+            }
         }
     }
+
+    if (manaZoneActive && !manaZoneWasActive) {
+        showManaZoneIcon();
+    } else if (!manaZoneActive && manaZoneWasActive) {
+        hideManaZoneIcon();
+    }
+    manaZoneWasActive = manaZoneActive;
 }, MANA_ZONE_POLL_MS);
 
 // ==========================================
 // ASTRA - right-click nova, on a cooldown
+// Locked entirely until purchased: this listener is the ONLY thing
+// right-click does now (the old magic-cost shot on right-click was
+// removed from script.js), and it no-ops until window.hasAstra is true.
 // ==========================================
 const ASTRA_COOLDOWN_MS = 8000;
 const ASTRA_DAMAGE = 15;
@@ -165,17 +229,37 @@ function flashAstraScreen() {
     flash.style.transition = 'opacity 0.4s ease';
     container.appendChild(flash);
 
+    const icon = document.createElement('img');
+    icon.src = 'images/astra.png';
+    icon.style.position = 'absolute';
+    icon.style.left = '50%';
+    icon.style.top = '50%';
+    icon.style.width = '160px';
+    icon.style.height = '160px';
+    icon.style.marginLeft = '-80px';
+    icon.style.marginTop = '-80px';
+    icon.style.pointerEvents = 'none';
+    icon.style.zIndex = '501';
+    icon.style.opacity = '0.95';
+    icon.style.transform = 'scale(0.4) rotate(0deg)';
+    icon.style.filter = 'drop-shadow(0 0 20px rgba(176,86,255,0.9))';
+    icon.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    container.appendChild(icon);
+
     requestAnimationFrame(() => {
         flash.style.opacity = '0';
+        icon.style.transform = 'scale(1.3) rotate(90deg)';
     });
-    setTimeout(() => flash.remove(), 450);
+    setTimeout(() => { flash.remove(); }, 450);
+    setTimeout(() => { icon.style.opacity = '0'; }, 350);
+    setTimeout(() => { icon.remove(); }, 850);
 }
 
 // ==========================================
 // ASMODEUS - rare bonus boss, bigger than the round bosses
 // ==========================================
 const ASMODEUS_SPRITE = "images/boss/asmodeus.png";
-const ASMODEUS_SCALE_MULTIPLIER = 1.4; // 40% bigger than demon-lord / nexial-lord
+const ASMODEUS_SCALE_MULTIPLIER = 1.4;
 const ASMODEUS_CHECK_INTERVAL_MS = 5000;
 const ASMODEUS_SPAWN_CHANCE = 1.0;
 let asmodeusAlive = false;
@@ -184,8 +268,6 @@ window.onAsmodeusDefeated = function () {
     asmodeusAlive = false;
 };
 
-// Callable directly (e.g. on purchase) or from the periodic chance-roll below.
-// Self-guards so it's always safe to call.
 window.spawnAsmodeusBoss = function () {
     if (typeof Component !== 'function' || typeof imagesScale === 'undefined') return;
     if (asmodeusAlive) {
